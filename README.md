@@ -9,5 +9,7 @@ Not carefully tested.
 
 See bf.html for usage.
 
+MIT license.
+
 Loot at https://bellard.org/libbf/ for more information.
 
