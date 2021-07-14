@@ -23,7 +23,7 @@
 # Enable Windows compilation
 #CONFIG_WIN32=y
 # build AVX2 version
-CONFIG_AVX2=y
+#CONFIG_AVX2=y
 # Enable profiling with gprof
 #CONFIG_PROFILE=y
 # compile the bftest utility to do regression tests and benchmarks. Must have
@@ -41,12 +41,12 @@ else
 EXE:=
 endif
 
-CC=$(CROSS_PREFIX)gcc
+CC=$(CROSS_PREFIX)emcc
 CFLAGS=-Wall -g $(PROFILE) -MMD
 CFLAGS+=-O2
 CFLAGS+=-flto
 #CFLAGS+=-Os
-LDFLAGS=
+LDFLAGS=-s ALLOW_MEMORY_GROWTH=1 -s EXPORTED_RUNTIME_METHODS=cwrap,ccall,allocateUTF8,AsciiToString -s EXPORTED_FUNCTIONS=_free,_malloc -s NO_EXIT_RUNTIME=1 -s EXPORT_NAME="createLibbf" -s WASM=1 -s MODULARIZE=1  -gsource-map --source-map-base ./
 ifdef CONFIG_PROFILE
 CFLAGS+=-p
 LDFLAGS+=-p
@@ -59,7 +59,7 @@ LDFLAGS+=-fsanitize=address
 endif
 LIBS=-lm
 
-PROGS+=bfbench$(EXE) tinypi$(EXE)
+PROGS+=bfbench$(EXE) tinypi$(EXE) libbf.js
 ifdef CONFIG_BFTEST
 PROGS+=bftest$(EXE)
 ifdef CONFIG_M32
@@ -71,6 +71,9 @@ PROGS+=bfbench-avx2$(EXE) tinypi-avx2$(EXE)
 endif
 
 all: $(PROGS)
+
+libbf.js: libbfjs.o libbf.o cutils.o
+	$(CC) $(LDFLAGS) -o $@ $^ $(LIBS)
 
 tinypi$(EXE): tinypi.o libbf.o cutils.o
 	$(CC) $(LDFLAGS) -o $@ $^ $(LIBS)

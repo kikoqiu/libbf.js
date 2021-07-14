@@ -24,6 +24,8 @@
 #ifndef LIBBF_H
 #define LIBBF_H
 
+//#define __x86_64__  //this slow down the speed
+
 #include <stddef.h>
 #include <stdint.h>
 
