@@ -109,7 +109,7 @@ var module=
 			this.visit_index=0;
 		}
 		//f.visited=new Date().getTime();
-		bfjs.gc_array.add(f);
+		module.gc_array.add(f);
 		if(this.gc_array.size>=this.gc_ele_limit){
 			this.gc();
 		}
@@ -135,7 +135,7 @@ var module=
 function bf(val,radix=10){
 	this.h=module.libbf._new_();
 	this.status=0;
-	bfjs.gc_track(this);
+	module.gc_track(this);
 	switch(typeof(val)){
 		case "undefined":
 			break;
@@ -156,7 +156,7 @@ module._bf=bf;
 bf.prototype.dispose=function(recoverable=true){
 	if(this.h!=0){
 		if(recoverable){
-			this.strval=this.toString(32,module.precision+8);
+			this.strval=this.toString(32,Math.ceil((module.precision+32)/Math.log2(32)));
 		}
 	}
 	if(this.h!=0){
@@ -167,10 +167,10 @@ bf.prototype.dispose=function(recoverable=true){
 }
 bf.prototype.geth=function(){	
 	//this would cause gc
-	bfjs.gc_track(this);
+	module.gc_track(this);
 	if(this.h==0){
 		this.h=module.libbf._new_();
-		this.fromString(this.strval,32,bfjs.precision);
+		this.fromString(this.strval,32,module.precision);
 	}	
 	return this.h;
 }
@@ -213,7 +213,7 @@ bf.prototype.wraptypeh=function (...ar){
 bf.prototype.flag=/*bf_set_exp_bits(15) MAXMUM | */ Flags.BF_RNDN | Flags.BF_FLAG_SUBNORMAL;
 
 bf.prototype.calc=function(method,a=null,b=null,prec){
-	if(prec<1)prec=bfjs.precision;
+	if(prec<1)prec=module.precision;
 	[cleanup,ah,bh]=this.wraptypeh(a,b);
 	this.status|=module.libbf._calc(method.charCodeAt(0),this.geth(),ah,bh,prec,this.flag);
 	cleanup();
@@ -221,7 +221,7 @@ bf.prototype.calc=function(method,a=null,b=null,prec){
 	return this;
 }
 bf.prototype.calc2=function(method,a=null,b=null,prec,rnd_mode=0,q=null){
-	if(prec<1)prec=bfjs.precision;
+	if(prec<1)prec=module.precision;
 	[cleanup,ah,bh,qh]=this.wraptypeh(a,b,q);
 	this.status|=module.libbf._calc2(method.charCodeAt(0),this.geth(),ah,bh,prec,this.flag,rnd_mode,qh);
 	cleanup();
@@ -432,19 +432,25 @@ for(let k in bf.prototype){
 
 bf.prototype.fromString=function(str,radix=10,prec=0){
 	if(radix>64)throw new Error('radix error');
-	if(prec<1)prec=bfjs.precision;
+	if(prec<1)prec=module.precision;
 	let hstr=module.libbf.allocateUTF8(str);
-	let ret= module.libbf._atof_(this.geth(),hstr,radix,prec,0);//Math.floor(prec/Math.log2(radix))
+	let ret= module.libbf._atof_(this.geth(),hstr,radix,prec,0);
 	module.libbf._free(hstr);
 	this.checkstatus(ret);
 	return this;
 }
+/**
+ * 
+ * @param {*} radix 
+ * @param {*} prec precision digits in radix
+ * @returns 
+ */
 bf.prototype.toString=function(radix=10,prec=0){
 	if(radix>64)throw new Error('radix error');
-	if(prec<1)prec=bfjs.precision;
+	if(prec<1)prec=Math.ceil(module.precision/Math.log2(radix));
 	let flag=Flags.BF_FTOA_FORMAT_FREE_MIN | Flags.BF_RNDZ | Flags.BF_FTOA_JS_QUIRKS;
 	flag=Flags.BF_FTOA_FORMAT_FIXED| Flags.BF_RNDZ | Flags.BF_FTOA_JS_QUIRKS
-	let ret= module.libbf._ftoa_(0,this.geth(),radix,Math.ceil(prec/Math.log2(radix)),flag);
+	let ret= module.libbf._ftoa_(0,this.geth(),radix,prec,flag);
 	let rets=module.libbf.AsciiToString(ret);
 	module.libbf._free(ret);
 	return rets;
@@ -469,21 +475,21 @@ module.helper={};
 module.helper.romberg=function romberg(f,_a,_b,_e=1e-30,info={}){
   max_step=info.max_step||20;
   max_acc=info.max_acc||12;
-  bfjs.decimal_precision(100);
-  let a=bfjs.bf(_a),b=bfjs.bf(_b),e=bfjs.bf(_e);
-  const f0p5=bfjs.bf(0.5);  
+  module.decimal_precision(100);
+  let a=module.bf(_a),b=module.bf(_b),e=module.bf(_e);
+  const f0p5=module.bf(0.5);  
   const b_a_d=b.sub(a).mul(f0p5);
   let T=[0,b_a_d.mul(f(a).add(f(b)))];
   for(let m=2;m<=max_step;++m){  
     let Tm=[];    
-  	let sum=bfjs.bf(0);
+  	let sum=module.bf(0);
   	for(let i=0;i<2**(m-2)/*do not overflow*/;++i){
       sum.setadd(sum,f(a.add(b_a_d.mul(i*2+1))));
     }
     Tm[1]=T[1].mul(f0p5).add(b_a_d.mul(sum));
   	b_a_d.setmul(b_a_d,f0p5);
     for(let j=2;j<=max_acc && j<=m;++j){
-      let c=bfjs.bf(4**(j-1)),c1=bfjs.bf(4**(j-1)-1);
+      let c=module.bf(4**(j-1)),c1=module.bf(4**(j-1)-1);
       Tm[j]=Tm[j-1].mul(c).sub(T[j-1]).div(c1);
     }
 	let err=Tm[Tm.length-1].sub(T[T.length-1]).abs();
@@ -507,7 +513,6 @@ module.helper.romberg=function romberg(f,_a,_b,_e=1e-30,info={}){
 
 
 module.Flags=Flags;
-
 return module;
 })();
 
