@@ -14,8 +14,8 @@ MIT license.
 Loot at https://bellard.org/libbf/ for more information.
 
 
-# Add Romberg Ingegration Support
-> Calc ingegration of 4/(1+x^2) from 0 to 1
+# Add Romberg Integration Support
+> Calc definite and improper integral of 4/(1+x^2) from 0 to 1
 > (Should be PI)
 ```
 info={}
