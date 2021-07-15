@@ -126,13 +126,13 @@ var module=
 		return !!this.libbf;
 	},
 	libbf:null,
-	bf(val){
-		return new this._bf(val);
+	bf(val,radix=10){
+		return new this._bf(val,radix);
 	}
 }; 
 
 
-function bf(val){
+function bf(val,radix=10){
 	this.h=module.libbf._new_();
 	this.status=0;
 	bfjs.gc_track(this);
@@ -140,11 +140,16 @@ function bf(val){
 		case "undefined":
 			break;
 		case "string":
-			this.fromString(val);
+			this.fromString(val,radix);
 			break;
 		case "number":
 			this.fromNumber(val);
-			break;			
+			break;
+		case 'object':
+			if(!!val &&val.constructor==bf)	{
+				this.copy(val);
+				break;
+			}
 	}
 }
 module._bf=bf;
@@ -223,40 +228,56 @@ bf.prototype.calc2=function(method,a=null,b=null,prec,rnd_mode=0,q=null){
 	this.checkstatus(this.status);
 	return this;
 }
-
-bf.prototype.setadd=function(a,b,prec=0){	
+bf.prototype.checkoprand=function(...args){
+	for(let a of args){
+		if(a===null || typeof(a)=='undefined'){
+			throw new Error('oprand missmatch');
+		}
+	}
+}
+bf.prototype.setadd=function(a,b,prec=0){
+	this.checkoprand(a,b);
 	return this.calc('+',a,b,prec);
 }
 bf.prototype.setsub=function(a,b,prec=0){	
+	this.checkoprand(a,b);
 	return this.calc('-',a,b,prec);
 }
 bf.prototype.setmul=function(a,b,prec=0){	
+	this.checkoprand(a,b);
 	return this.calc('*',a,b,prec);
 }
-bf.prototype.setdiv=function(a,b,prec=0){	
+bf.prototype.setdiv=function(a,b,prec=0){
+	this.checkoprand(a,b);	
 	return this.calc('/',a,b,prec);
 }
 bf.prototype.setmod=function(a,b,prec=0){
+	this.checkoprand(a,b);
 	return this.calc2('%',a,b,prec,Flags.BF_RNDZ,null);
 }
 bf.prototype.setrem=function(a,b,prec=0){
+	this.checkoprand(a,b);
 	return this.calc2('%',a,b,prec,Flags.BF_RNDN,null);
 }
-bf.prototype.setor=function(a,b,prec=0){	
+bf.prototype.setor=function(a,b,prec=0){
+	this.checkoprand(a,b);	
 	return this.calc('|',a,b,prec);
 }
 bf.prototype.setxor=function(a,b,prec=0){	
+	this.checkoprand(a,b);
 	return this.calc('^',a,b,prec);
 }
-bf.prototype.setand=function(a,b,prec=0){	
+bf.prototype.setand=function(a,b,prec=0){
+	this.checkoprand(a,b);	
 	return this.calc('&',a,b,prec);
 }
 
 bf.prototype.setsqrt=function(a,prec=0){	
+	this.checkoprand(a);
 	return this.calc('s',a,null,prec);
 }
 /*round to prec*/
-bf.prototype.fpround=function(prec=0,flags){
+bf.prototype.fpround=function(prec=0,flags=Flags.BF_RNDN){
 	return this.calc('r',null,null,prec,flags,null);
 }
 /*round to int*/
@@ -280,6 +301,7 @@ bf.prototype.abs=function(){
 }
 
 bf.prototype.setsign=function(a,prec=0){
+	this.checkoprand(a);
 	return this.calc('g',a,null,prec);
 }
 bf.prototype.setLOG2=function(prec=0){	
@@ -301,33 +323,43 @@ bf.prototype.setEPSILON=function(prec=0){
 
 
 bf.prototype.setexp=function(a,prec=0){	
+	this.checkoprand(a);
 	return this.calc('E',a,null,prec);
 }
 bf.prototype.setlog=function(a,prec=0){	
+	this.checkoprand(a);
 	return this.calc('L',a,null,prec);
 }
 bf.prototype.setpow=function(a,b,prec=0){
+	this.checkoprand(a,b);
 	return this.calc('P',a,b,prec,this.flag|BF_POW_JS_QUIRKS);
 }
 bf.prototype.setcos=function(a,prec=0){	
+	this.checkoprand(a);
 	return this.calc('c',a,null,prec);
 }
 bf.prototype.setsin=function(a,prec=0){	
+	this.checkoprand(a);
 	return this.calc('S',a,null,prec);
 }
 bf.prototype.settan=function(a,prec=0){	
+	this.checkoprand(a);
 	return this.calc('T',a,null,prec);
 }
-bf.prototype.setatan=function(a,prec=0){	
+bf.prototype.setatan=function(a,prec=0){
+	this.checkoprand(a);	
 	return this.calc('4',a,null,prec);
 }
 bf.prototype.setatan2=function(a,b,prec=0){	
+	this.checkoprand(a,b);
 	return this.calc('5',a,null,prec);
 }
 bf.prototype.setasin=function(a,prec=0){	
+	this.checkoprand(a);
 	return this.calc('6',a,null,prec);
 }
 bf.prototype.setacos=function(a,prec=0){	
+	this.checkoprand(a);
 	return this.calc('7',a,null,prec);
 }
 
@@ -341,16 +373,21 @@ bf.prototype.is_nan=function(){
 bf.prototype.is_zero=function(){	
 	return module.libbf._is_zero_(this.geth());
 }
-bf.prototype.copy=function(a){	
+bf.prototype.copy=function(a){
+	this.checkoprand(a);
 	return module.libbf._set_(this.geth(),a.geth());
 }
-bf.prototype.fromNumber=function(a){	
+bf.prototype.clone=function(){	
+	return new bf(this);
+}
+bf.prototype.fromNumber=function(a){
 	return module.libbf._set_number_(this.geth(),a);
 }
 bf.prototype.toNumber=bf.prototype.f64=function(){	
 	return module.libbf._get_number_(this.geth());
 }
 bf.prototype.cmp=function(b){	
+	this.checkoprand(b);
 	return module.libbf._cmp_(this.geth(),b.geth());
 }
 
@@ -374,12 +411,15 @@ for(let k in bf.prototype){
 		let nfunc=k.substr(3);
 		bf.prototype[nfunc]=function(...args){
 			if(numps==1){
+				if(args.length!=0)throw new Error('oprand missmatch');
 				let a=[];
 				return ofunc.apply(new bf(), a);
 			}else if(numps==2){
+				if(args.length!=0)throw new Error('oprand missmatch');
 				let a=[this];
 				return ofunc.apply(new bf(), a);
 			}else{
+				if(args.length+2!=numps)throw new Error('oprand missmatch');
 				let a=[this,...args];
 				return ofunc.apply(new bf(), a);
 			}
@@ -415,6 +455,54 @@ bf.prototype.toString=function(radix=10,prec=0){
 
 
 
+module.helper={};
+
+/**
+ * Romberg integeration
+ * @param {Function} f function
+ * @param {*} _a start
+ * @param {*} _b end
+ * @param {*} _e epsilon(Absolute error tolorance)
+ * @param {Object} info {max_step:20,max_acc:12,steps:run steps,error:result error evaluation}
+ * @returns 
+ */
+module.helper.romberg=function romberg(f,_a,_b,_e=1e-30,info={}){
+  max_step=info.max_step||20;
+  max_acc=info.max_acc||12;
+  bfjs.decimal_precision(100);
+  let a=bfjs.bf(_a),b=bfjs.bf(_b),e=bfjs.bf(_e);
+  const f0p5=bfjs.bf(0.5);  
+  const b_a_d=b.sub(a).mul(f0p5);
+  let T=[0,b_a_d.mul(f(a).add(f(b)))];
+  for(let m=2;m<=max_step;++m){  
+    let Tm=[];    
+  	let sum=bfjs.bf(0);
+  	for(let i=0;i<2**(m-2)/*do not overflow*/;++i){
+      sum.setadd(sum,f(a.add(b_a_d.mul(i*2+1))));
+    }
+    Tm[1]=T[1].mul(f0p5).add(b_a_d.mul(sum));
+  	b_a_d.setmul(b_a_d,f0p5);
+    for(let j=2;j<=max_acc && j<=m;++j){
+      let c=bfjs.bf(4**(j-1)),c1=bfjs.bf(4**(j-1)-1);
+      Tm[j]=Tm[j-1].mul(c).sub(T[j-1]).div(c1);
+    }
+	let err=Tm[Tm.length-1].sub(T[T.length-1]).abs();
+    if(!!info.debug && m>5){    	
+        console.log('R['+m+']='+Tm[4]);
+        console.log(err.toString(10,3));
+    }
+    if(m>5 && err.cmp(e)<0){
+		info.steps=m;
+		info.error=err;
+		return Tm[Tm.length-1];
+    }else if(m==max_step){
+		info.steps=m;
+		info.error=err;
+     	return null;
+    }
+    T=Tm;
+  }
+}
 
 
 
