@@ -13,3 +13,14 @@ MIT license.
 
 Loot at https://bellard.org/libbf/ for more information.
 
+
+# Add Romberg Ingegration Support
+> Calc ingegration of 4/(1+x^2) from 0 to 1
+> (Should be PI)
+```
+info={}
+rst=bfjs.helper.romberg(
+  (x)=>bfjs.bf(4).div(x.mul(x).add(1)),
+  0,1,1e-40,info);
+console.log(rst.toString(10,40)+', steps=',info.steps)
+```
