@@ -1,13 +1,13 @@
 # libbf.js
-libbf emscripten
+* libbf emscripten
+* Port LibBF Library from Fabrice Bellard to the browser envirenment by emscripten.
+* Better performance than other js libraries.
+* Not carefully tested.
 
-Port LibBF Library from Fabrice Bellard to the browser envirenment by emscripten.
+# Envirenment
+* Runs in a browser
+* The WASM code loading requires an http server to work
 
-Better performance than other js libraries.
-
-Not carefully tested.
-
-See bf.html for usage.
 
 MIT license.
 
@@ -24,3 +24,45 @@ rst=bfjs.helper.romberg(
   0,1,1e-40,info);
 console.log(rst.toString(10,40)+', steps=',info.steps)
 ```
+
+
+
+# Usage
+See bf.html for usage.
+```
+  <script src="libbf.js"></script>
+  <script src="bf.js"></script>
+  <div id='output' style="word-wrap:break-word;width:100vw;"></div>
+  <script>
+
+
+function assert(q){
+  if(!q){
+    throw new Error(q);
+  }
+}
+function asserteq(a,b){
+  assert(a==b);
+}
+
+
+function test(ma,mb,times){
+  for(var i=0;i<times;++i){
+    a=Math.random();
+    b=Math.random();
+    asserteq(ma(a,b),mb(a,b));
+  }
+}
+
+bfjs.ready=function(){
+  test((a,b)=>a+b,(a,b)=>bfjs.bf(a).add(b).f64(),1000);
+  test((a,b)=>a-b,(a,b)=>bfjs.bf(a).sub(b).f64(),1000);
+  test((a,b)=>a*b,(a,b)=>bfjs.bf(a).mul(b).f64(),1000);
+  test((a,b)=>a/b,(a,b)=>bfjs.bf(a).div(b).f64(),1000);
+  test((a,b)=>a%b,(a,b)=>bfjs.bf(a).mod(b).f64(),1000);
+  
+  bfjs.decimal_precision(10240);
+  document.getElementById('output').innerHTML='PI='+bfjs.bf().setPI().toString();
+}
+  </script>
+  ```
