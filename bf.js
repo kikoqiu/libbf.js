@@ -67,7 +67,7 @@ Flags.BF_FTOA_ADD_PREFIX =  (1 << 21)
 /* return "Infinity" instead of "Inf" and add a "+" for positive
 exponents */
 Flags.BF_FTOA_JS_QUIRKS   = (1 << 22)
-
+Flags.BF_POW_JS_QUIRKS= (1 << 16); /* (+/-1)^(+/-Inf) = NaN, 1^NaN = NaN */
 
 Flags.BF_RNDN=0; /* round to nearest, ties to even */
 Flags.BF_RNDZ=1; /* round to zero */
@@ -332,7 +332,7 @@ bf.prototype.setlog=function(a,prec=0){
 }
 bf.prototype.setpow=function(a,b,prec=0){
 	this.checkoprand(a,b);
-	return this.calc('P',a,b,prec,this.flag|BF_POW_JS_QUIRKS);
+	return this.calc('P',a,b,prec,this.flag|Flags.BF_POW_JS_QUIRKS);
 }
 bf.prototype.setcos=function(a,prec=0){	
 	this.checkoprand(a);
@@ -448,7 +448,8 @@ bf.prototype.fromString=function(str,radix=10,prec=0){
 bf.prototype.toString=function(radix=10,prec=0){
 	if(radix>64)throw new Error('radix error');
 	if(prec<1)prec=Math.ceil(module.precision/Math.log2(radix));
-	let flag=Flags.BF_FTOA_FORMAT_FREE_MIN | Flags.BF_RNDZ | Flags.BF_FTOA_JS_QUIRKS;
+	let flag=0;
+	//Flags.BF_FTOA_FORMAT_FREE_MIN | Flags.BF_RNDZ | Flags.BF_FTOA_JS_QUIRKS;
 	flag=Flags.BF_FTOA_FORMAT_FIXED| Flags.BF_RNDZ | Flags.BF_FTOA_JS_QUIRKS
 	let ret= module.libbf._ftoa_(0,this.geth(),radix,prec,flag);
 	let rets=module.libbf.AsciiToString(ret);
@@ -468,15 +469,22 @@ module.helper={};
  * @param {Function} f function
  * @param {*} _a start
  * @param {*} _b end
- * @param {*} _e epsilon(Absolute error tolorance)
- * @param {Object} info {max_step:20,max_acc:12,steps:run steps,error:result error evaluation}
- * @returns 
+ * @param {*} _e Absolute error tolorance default 1e-30
+ * @param {*} _re Relative error tolorance default =_e   (e < _e or re < _re)
+ * @param {Object} info {max_step:20,max_acc:12,max_time:10000,steps:run steps,error:result error evaluation}
+ * @returns result or null
  */
-module.helper.romberg=function romberg(f,_a,_b,_e=1e-30,info={}){
-  max_step=info.max_step||20;
-  max_acc=info.max_acc||12;
+module.helper.romberg=function romberg(f,_a,_b,_e=1e-30,_re=_e,info={}){
+  let max_step=info.max_step||20,
+  	max_acc=info.max_acc||12,
+  	max_time=info.max_time||10000;
+  let start_time=new Date().getTime();
+  info.toString=function(){
+	  return `lastresult=${this.lastresult}, steps=${this.steps}/${max_step}, error=${this.error.toString(10,3)}, rerror=${this.rerror.toString(10,3)}, exectime=${this.exectime}/${max_time}`
+	};
+
   module.decimal_precision(100);
-  let a=module.bf(_a),b=module.bf(_b),e=module.bf(_e);
+  let a=module.bf(_a),b=module.bf(_b),e=module.bf(_e),re=module.bf(_re);
   const f0p5=module.bf(0.5);  
   const b_a_d=b.sub(a).mul(f0p5);
   let T=[0,b_a_d.mul(f(a).add(f(b)))];
@@ -493,18 +501,29 @@ module.helper.romberg=function romberg(f,_a,_b,_e=1e-30,info={}){
       Tm[j]=Tm[j-1].mul(c).sub(T[j-1]).div(c1);
     }
 	let err=Tm[Tm.length-1].sub(T[T.length-1]).abs();
+	let rerr=err.div(Tm[Tm.length-1]);
     if(!!info.debug && m>5){    	
         console.log('R['+m+']='+Tm[4]);
         console.log(err.toString(10,3));
     }
-    if(m>5 && err.cmp(e)<0){
-		info.steps=m;
-		info.error=err;
-		return Tm[Tm.length-1];
-    }else if(m==max_step){
-		info.steps=m;
-		info.error=err;
-     	return null;
+	info.steps=m;
+	info.error=err;
+	info.rerror=rerr;
+	info.exectime=new Date().getTime()-start_time;
+	info.lastresult=Tm[Tm.length-1];
+	//not stable
+	//let effdigits=Math.floor(err.log().f64()/Math.log(10));
+	//info.lastresult=Tm[Tm.length-1].mul(Math.pow(10,-effdigits)).trunc().mul(Math.pow(10,effdigits));
+
+	if(info.cb){
+		info.cb();
+	}
+    if(m>5 && (err.cmp(e)<=0 || rerr.cmp(re)<=0)){
+		info.result=info.lastresult;
+		return info.result;
+    }else if(m==max_step || info.exectime>max_time){
+		info.result=null;
+		return info.result;
     }
     T=Tm;
   }
