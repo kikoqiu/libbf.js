@@ -1,7 +1,7 @@
 # libbf.js
-* libbf emscripten
+libbf emscriptened
 * Port LibBF Library from Fabrice Bellard to the browser envirenment by emscripten.
-* Better performance than other js libraries.
+* Better performance js bigfloat libraries with precision.
 * Not carefully tested.
 
 # Envirenment
@@ -21,8 +21,8 @@ Loot at https://bellard.org/libbf/ for more information.
 info={}
 rst=bfjs.helper.romberg(
   (x)=>bfjs.bf(4).div(x.mul(x).add(1)),
-  0,1,1e-40,info);
-console.log(rst.toString(10,40)+', steps=',info.steps)
+  0,1,1e-40,1e-40,info);
+console.log(info+'')
 ```
 
 
