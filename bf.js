@@ -478,9 +478,18 @@ module.helper.romberg=function romberg(f,_a,_b,_e=1e-30,_re=_e,info={}){
   let max_step=info.max_step||20,
   	max_acc=info.max_acc||12,
   	max_time=info.max_time||10000;
+  if(typeof(_e)!='number'|| typeof(_re)!='number' || typeof(info)!="object"){
+	  throw new Error("arguments error");
+  }
   let start_time=new Date().getTime();
   info.toString=function(){
-	  return `lastresult=${this.lastresult}, steps=${this.steps}/${max_step}, error=${this.error.toString(10,3)}, rerror=${this.rerror.toString(10,3)}, exectime=${this.exectime}/${max_time}`
+	  return `lastresult=${this.lastresult}, 
+	  effective_result=${this.eff_result},
+	  steps=${this.steps}/${max_step}, 
+	  error=${this.error.toString(10,3)},
+	  rerror=${this.rerror.toString(10,3)},
+	  eff_decimal_precision=${this.eff_decimal_precision}, 	  
+	  exectime=${this.exectime}/${max_time}`
 	};
 
   module.decimal_precision(100);
@@ -506,14 +515,21 @@ module.helper.romberg=function romberg(f,_a,_b,_e=1e-30,_re=_e,info={}){
         console.log('R['+m+']='+Tm[4]);
         console.log(err.toString(10,3));
     }
+
+	info.exectime=new Date().getTime()-start_time;
+	info.lastresult=Tm[Tm.length-1];	
 	info.steps=m;
 	info.error=err;
 	info.rerror=rerr;
-	info.exectime=new Date().getTime()-start_time;
-	info.lastresult=Tm[Tm.length-1];
-	//not stable
-	//let effdigits=Math.floor(err.log().f64()/Math.log(10));
-	//info.lastresult=Tm[Tm.length-1].mul(Math.pow(10,-effdigits)).trunc().mul(Math.pow(10,effdigits));
+	info.eff_decimal_precision=Math.floor(-info.rerror.log().f64()/Math.log(10));
+	if(info.eff_decimal_precision<=0){
+		info.eff_decimal_precision=0;
+		info.eff_result='';
+	}else{
+		info.eff_result=info.lastresult.toString(10,info.eff_decimal_precision);
+	}
+
+
 
 	if(info.cb){
 		info.cb();
