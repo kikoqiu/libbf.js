@@ -116,7 +116,11 @@ var module=
 	},
 	precision:500,
 	decimal_precision(dp){
-		this.precision=Math.ceil(dp*Math.log2(10));
+		if(dp!=undefined){
+			this.precision=Math.ceil(dp*Math.log2(10));
+		}else{
+			return Math.ceil(this.precision/Math.log2(10));
+		}
 	},
 	gc_ele_limit:200,//maxmum elements before gc
 	ready(){
@@ -214,7 +218,7 @@ bf.prototype.flag=/*bf_set_exp_bits(15) MAXMUM | */ Flags.BF_RNDN | Flags.BF_FLA
 
 bf.prototype.calc=function(method,a=null,b=null,prec){
 	if(prec<1)prec=module.precision;
-	[cleanup,ah,bh]=this.wraptypeh(a,b);
+	let [cleanup,ah,bh]=this.wraptypeh(a,b);
 	this.status|=module.libbf._calc(method.charCodeAt(0),this.geth(),ah,bh,prec,this.flag);
 	cleanup();
 	this.checkstatus(this.status);
@@ -222,7 +226,7 @@ bf.prototype.calc=function(method,a=null,b=null,prec){
 }
 bf.prototype.calc2=function(method,a=null,b=null,prec,rnd_mode=0,q=null){
 	if(prec<1)prec=module.precision;
-	[cleanup,ah,bh,qh]=this.wraptypeh(a,b,q);
+	let [cleanup,ah,bh,qh]=this.wraptypeh(a,b,q);
 	this.status|=module.libbf._calc2(method.charCodeAt(0),this.geth(),ah,bh,prec,this.flag,rnd_mode,qh);
 	cleanup();
 	this.checkstatus(this.status);
@@ -386,9 +390,12 @@ bf.prototype.fromNumber=function(a){
 bf.prototype.toNumber=bf.prototype.f64=function(){	
 	return module.libbf._get_number_(this.geth());
 }
-bf.prototype.cmp=function(b){	
+bf.prototype.cmp=function(b){
 	this.checkoprand(b);
-	return module.libbf._cmp_(this.geth(),b.geth());
+	let [cleanup,bh]=this.wraptypeh(b);
+	let ret= module.libbf._cmp_(this.geth(),bh);
+	cleanup();
+	return ret;
 }
 
 
@@ -411,22 +418,54 @@ for(let k in bf.prototype){
 		let nfunc=k.substr(3);
 		bf.prototype[nfunc]=function(...args){
 			if(numps==1){
-				if(args.length!=0)throw new Error('oprand missmatch');
+				if(args.length!=0)throw new Error('oprands missmatch');
 				let a=[];
 				return ofunc.apply(new bf(), a);
 			}else if(numps==2){
-				if(args.length!=0)throw new Error('oprand missmatch');
+				if(args.length!=0)throw new Error('oprands missmatch');
 				let a=[this];
 				return ofunc.apply(new bf(), a);
 			}else{
-				if(args.length+2!=numps)throw new Error('oprand missmatch');
+				if(args.length+2!=numps)throw new Error('oprands missmatch');
 				let a=[this,...args];
 				return ofunc.apply(new bf(), a);
 			}
 		}
+		module[nfunc]=function(...args){			
+			if(args.length+1!=numps)throw new Error('oprands missmatch');
+			return ofunc.apply(new bf(), args);			
+		}
 	}
 }
 
+bf.prototype.operatorAdd=bf.prototype.add;
+bf.prototype.operatorSub=bf.prototype.sub;
+bf.prototype.operatorMul=bf.prototype.mul;
+bf.prototype.operatorDiv=bf.prototype.div;
+bf.prototype.operatorPow=bf.prototype.pow;
+bf.prototype.operatorBinaryAnd=bf.prototype.and;
+bf.prototype.operatorBinaryOr=bf.prototype.or;
+bf.prototype.operatorBinaryXor=bf.prototype.xor;
+//bf.prototype.operatorBinaryLShift=bf.prototype.mul2exp;
+//bf.prototype.operatorBinaryRShift=bf.prototype.mul2exp;
+bf.prototype.operatorLess=function(b){
+	return this.cmp(b)<0;
+}
+bf.prototype.operatorGreater=function(b){
+	return this.cmp(b)>0;
+}
+bf.prototype.operatorLessEqual=function(b){
+	return this.cmp(b)<=0;
+}
+bf.prototype.operatorGreaterEqual=function(b){
+	return this.cmp(b)>=0;
+}
+bf.prototype.operatorEqual=function(b){
+	return this.cmp(b)==0;
+}
+bf.prototype.operatorNotEqual=function(b){
+	return this.cmp(b)!=0;
+}
 
 
 
@@ -456,6 +495,23 @@ bf.prototype.toString=function(radix=10,prec=0){
 	module.libbf._free(ret);
 	return rets;
 }
+/**
+ * 
+ * @param {*} radix 
+ * @param {*} prec precision digits in radix
+ * @returns 
+ */
+ bf.prototype.toFixed=function(radix=10,prec=0,rnd_mode=Flags.BF_RNDNA){
+	if(radix>64)throw new Error('radix error');
+	if(prec<1)prec=Math.floor(module.precision/Math.log2(radix));
+	let flag=0;
+	flag= rnd_mode | Flags.BF_FTOA_FORMAT_FRAC
+	let ret= module.libbf._ftoa_(0,this.geth(),radix,prec,flag);
+	let rets=module.libbf.AsciiToString(ret);
+	module.libbf._free(ret);
+	return rets;
+}
+
 
 
 
@@ -526,7 +582,11 @@ module.helper.romberg=function romberg(f,_a,_b,_e=1e-30,_re=_e,info={}){
 		info.eff_decimal_precision=0;
 		info.eff_result='';
 	}else{
-		info.eff_result=info.lastresult.toString(10,info.eff_decimal_precision);
+		if(info.eff_decimal_precision>bfjs.decimal_precision()){
+			info.eff_result=info.lastresult.toString(10);
+		}else{
+			info.eff_result=info.lastresult.toString(10,info.eff_decimal_precision);
+		}		
 	}
 
 
