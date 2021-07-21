@@ -1,4 +1,10 @@
-var bfjs=(function(){
+/**
+ * copyright © 2021-2021 kikoqiu
+ * MIT Licence
+ * 
+ */
+
+ var bfjs=(function(){
 
 
 
@@ -115,12 +121,24 @@ var module=
 		}
 	},
 	precision:500,
+	precision_array:[],
+	push_precision(prec){
+		this.precision_array.push(this.precision);
+		this.precision=prec;
+	},
+	pop_precision(){
+		this.precision=this.precision_array.pop();
+	},
 	decimal_precision(dp){
 		if(dp!=undefined){
 			this.precision=Math.ceil(dp*Math.log2(10));
 		}else{
 			return Math.ceil(this.precision/Math.log2(10));
 		}
+	},
+	push_decimal_precision(dp){
+		this.push_precision(0);
+		this.decimal_precision(dp);
 	},
 	gc_ele_limit:200,//maxmum elements before gc
 	ready(){
@@ -548,7 +566,6 @@ module.helper.romberg=function romberg(f,_a,_b,_e=1e-30,_re=_e,info={}){
 	  exectime=${this.exectime}/${max_time}`
 	};
 
-  module.decimal_precision(100);
   let a=module.bf(_a),b=module.bf(_b),e=module.bf(_e),re=module.bf(_re);
   const f0p5=module.bf(0.5);  
   const b_a_d=b.sub(a).mul(f0p5);
