@@ -1,4 +1,4 @@
-let bfjs=(function(){
+var bfjs=(function(){
 
 
 
