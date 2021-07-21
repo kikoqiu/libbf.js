@@ -1,8 +1,14 @@
 # libbf.js
 libbf emscriptened
+* High precision floating point number library for browsers
 * Port LibBF Library from Fabrice Bellard to the browser envirenment by emscripten.
 * Better performance js bigfloat libraries with precision.
 * Not carefully tested.
+
+# Demo
+Try it here!
+
+https://kikoqiu.github.io/jslab/jslab.html
 
 # Envirenment
 * Runs in a browser
