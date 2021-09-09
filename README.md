@@ -5,6 +5,61 @@ Arbitrary precision floating point number library. Libbf emscriptened.
 * Better performance js bigfloat libraries with precision.
 * Not carefully tested.
 
+# Usage
+## constructor
+var num=bfjs.bf(a : number or string)
+## Math functions
+```
+add
+sub
+mul
+div
+mod
+rem
+or
+xor
+and
+sqrt
+fpround
+round
+trunc
+floor
+ceil
+neg
+abs
+sign
+LOG2
+PI
+MIN_VALUE
+MAX_VALUE
+EPSILON
+exp
+log
+pow
+cos
+sin
+tan
+atan
+atan2
+asin
+acos
+is_finit
+is_nan
+is_zero
+copy
+clone
+fromNumber
+toNumber
+f64
+cmp
+```
+
+## script
+```
+<script src="libbf.js"></script>
+<script src="bf.js"></script>
+```
+
 # Demo
 Try it here!
 
@@ -20,6 +75,7 @@ MIT license.
 Loot at https://bellard.org/libbf/ for more information.
 
 
+
 # Add Romberg Integration Support
 > Calc definite integral of 4/(1+x^2) from 0 to 1
 > (Should be PI)
@@ -32,43 +88,4 @@ console.log(info+'')
 ```
 
 
-
-# Usage
-See bf.html for usage.
-```
-  <script src="libbf.js"></script>
-  <script src="bf.js"></script>
-  <div id='output' style="word-wrap:break-word;width:100vw;"></div>
-  <script>
-
-
-function assert(q){
-  if(!q){
-    throw new Error(q);
-  }
-}
-function asserteq(a,b){
-  assert(a==b);
-}
-
-
-function test(ma,mb,times){
-  for(var i=0;i<times;++i){
-    a=Math.random();
-    b=Math.random();
-    asserteq(ma(a,b),mb(a,b));
-  }
-}
-
-bfjs.ready=function(){
-  test((a,b)=>a+b,(a,b)=>bfjs.bf(a).add(b).f64(),1000);
-  test((a,b)=>a-b,(a,b)=>bfjs.bf(a).sub(b).f64(),1000);
-  test((a,b)=>a*b,(a,b)=>bfjs.bf(a).mul(b).f64(),1000);
-  test((a,b)=>a/b,(a,b)=>bfjs.bf(a).div(b).f64(),1000);
-  test((a,b)=>a%b,(a,b)=>bfjs.bf(a).mod(b).f64(),1000);
-  
-  bfjs.decimal_precision(10240);
-  document.getElementById('output').innerHTML='PI='+bfjs.bf().setPI().toString();
-}
-  </script>
-  ```
+See bf.html for demo.
