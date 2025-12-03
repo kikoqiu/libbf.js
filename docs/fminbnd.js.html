@@ -1,0 +1,374 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    
+    <meta charset="utf-8">
+    <title>fminbnd.js - Documentation</title>
+    
+    
+    <script src="scripts/prettify/prettify.js"></script>
+    <script src="scripts/prettify/lang-css.js"></script>
+    <!--[if lt IE 9]>
+      <script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
+    <![endif]-->
+    <link type="text/css" rel="stylesheet" href="styles/prettify.css">
+    <link type="text/css" rel="stylesheet" href="styles/jsdoc.css">
+    <script src="scripts/nav.js" defer></script>
+    
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+</head>
+<body>
+
+<input type="checkbox" id="nav-trigger" class="nav-trigger" />
+<label for="nav-trigger" class="navicon-button x">
+  <div class="navicon"></div>
+</label>
+
+<label for="nav-trigger" class="overlay"></label>
+
+<nav >
+    
+    
+    <h2><a href="index.html">Home</a></h2><h3>Classes</h3><ul><li><a href="BigFloat.html">BigFloat</a><ul class='methods'><li data-type='method'><a href="BigFloat.html#abs">abs</a></li><li data-type='method'><a href="BigFloat.html#acos">acos</a></li><li data-type='method'><a href="BigFloat.html#add">add</a></li><li data-type='method'><a href="BigFloat.html#and">and</a></li><li data-type='method'><a href="BigFloat.html#asin">asin</a></li><li data-type='method'><a href="BigFloat.html#atan">atan</a></li><li data-type='method'><a href="BigFloat.html#atan2">atan2</a></li><li data-type='method'><a href="BigFloat.html#calc">calc</a></li><li data-type='method'><a href="BigFloat.html#calc2">calc2</a></li><li data-type='method'><a href="BigFloat.html#callFunc">callFunc</a></li><li data-type='method'><a href="BigFloat.html#ceil">ceil</a></li><li data-type='method'><a href="BigFloat.html#checkoprand">checkoprand</a></li><li data-type='method'><a href="BigFloat.html#checkstatus">checkstatus</a></li><li data-type='method'><a href="BigFloat.html#clone">clone</a></li><li data-type='method'><a href="BigFloat.html#cmp">cmp</a></li><li data-type='method'><a href="BigFloat.html#copy">copy</a></li><li data-type='method'><a href="BigFloat.html#cos">cos</a></li><li data-type='method'><a href="BigFloat.html#dispose">dispose</a></li><li data-type='method'><a href="BigFloat.html#div">div</a></li><li data-type='method'><a href="BigFloat.html#equals">equals</a></li><li data-type='method'><a href="BigFloat.html#exp">exp</a></li><li data-type='method'><a href="BigFloat.html#f64">f64</a></li><li data-type='method'><a href="BigFloat.html#floor">floor</a></li><li data-type='method'><a href="BigFloat.html#fpround">fpround</a></li><li data-type='method'><a href="BigFloat.html#fromNumber">fromNumber</a></li><li data-type='method'><a href="BigFloat.html#getEpsilon">getEpsilon</a></li><li data-type='method'><a href="BigFloat.html#geth">geth</a></li><li data-type='method'><a href="BigFloat.html#isAlmostZero">isAlmostZero</a></li><li data-type='method'><a href="BigFloat.html#isExactZero">isExactZero</a></li><li data-type='method'><a href="BigFloat.html#isFinit">isFinit</a></li><li data-type='method'><a href="BigFloat.html#isInExact">isInExact</a></li><li data-type='method'><a href="BigFloat.html#isNaN">isNaN</a></li><li data-type='method'><a href="BigFloat.html#isZero">isZero</a></li><li data-type='method'><a href="BigFloat.html#log">log</a></li><li data-type='method'><a href="BigFloat.html#mod">mod</a></li><li data-type='method'><a href="BigFloat.html#mul">mul</a></li><li data-type='method'><a href="BigFloat.html#neg">neg</a></li><li data-type='method'><a href="BigFloat.html#operatorEqual">operatorEqual</a></li><li data-type='method'><a href="BigFloat.html#operatorGreater">operatorGreater</a></li><li data-type='method'><a href="BigFloat.html#operatorGreaterEqual">operatorGreaterEqual</a></li><li data-type='method'><a href="BigFloat.html#operatorLess">operatorLess</a></li><li data-type='method'><a href="BigFloat.html#operatorLessEqual">operatorLessEqual</a></li><li data-type='method'><a href="BigFloat.html#operatorNotEqual">operatorNotEqual</a></li><li data-type='method'><a href="BigFloat.html#or">or</a></li><li data-type='method'><a href="BigFloat.html#pow">pow</a></li><li data-type='method'><a href="BigFloat.html#rem">rem</a></li><li data-type='method'><a href="BigFloat.html#round">round</a></li><li data-type='method'><a href="BigFloat.html#setEPSILON">setEPSILON</a></li><li data-type='method'><a href="BigFloat.html#setLOG2">setLOG2</a></li><li data-type='method'><a href="BigFloat.html#setMAX_VALUE">setMAX_VALUE</a></li><li data-type='method'><a href="BigFloat.html#setMIN_VALUE">setMIN_VALUE</a></li><li data-type='method'><a href="BigFloat.html#setPI">setPI</a></li><li data-type='method'><a href="BigFloat.html#setabs">setabs</a></li><li data-type='method'><a href="BigFloat.html#setacos">setacos</a></li><li data-type='method'><a href="BigFloat.html#setadd">setadd</a></li><li data-type='method'><a href="BigFloat.html#setand">setand</a></li><li data-type='method'><a href="BigFloat.html#setasin">setasin</a></li><li data-type='method'><a href="BigFloat.html#setatan">setatan</a></li><li data-type='method'><a href="BigFloat.html#setatan2">setatan2</a></li><li data-type='method'><a href="BigFloat.html#setceil">setceil</a></li><li data-type='method'><a href="BigFloat.html#setcos">setcos</a></li><li data-type='method'><a href="BigFloat.html#setdiv">setdiv</a></li><li data-type='method'><a href="BigFloat.html#setexp">setexp</a></li><li data-type='method'><a href="BigFloat.html#setfloor">setfloor</a></li><li data-type='method'><a href="BigFloat.html#setfpround">setfpround</a></li><li data-type='method'><a href="BigFloat.html#setlog">setlog</a></li><li data-type='method'><a href="BigFloat.html#setmod">setmod</a></li><li data-type='method'><a href="BigFloat.html#setmul">setmul</a></li><li data-type='method'><a href="BigFloat.html#setneg">setneg</a></li><li data-type='method'><a href="BigFloat.html#setor">setor</a></li><li data-type='method'><a href="BigFloat.html#setpow">setpow</a></li><li data-type='method'><a href="BigFloat.html#setrem">setrem</a></li><li data-type='method'><a href="BigFloat.html#setround">setround</a></li><li data-type='method'><a href="BigFloat.html#setsign">setsign</a></li><li data-type='method'><a href="BigFloat.html#setsin">setsin</a></li><li data-type='method'><a href="BigFloat.html#setsqrt">setsqrt</a></li><li data-type='method'><a href="BigFloat.html#setsub">setsub</a></li><li data-type='method'><a href="BigFloat.html#settan">settan</a></li><li data-type='method'><a href="BigFloat.html#settrunc">settrunc</a></li><li data-type='method'><a href="BigFloat.html#setxor">setxor</a></li><li data-type='method'><a href="BigFloat.html#sign">sign</a></li><li data-type='method'><a href="BigFloat.html#sin">sin</a></li><li data-type='method'><a href="BigFloat.html#sqrt">sqrt</a></li><li data-type='method'><a href="BigFloat.html#sub">sub</a></li><li data-type='method'><a href="BigFloat.html#tan">tan</a></li><li data-type='method'><a href="BigFloat.html#toBigInt">toBigInt</a></li><li data-type='method'><a href="BigFloat.html#toComplex">toComplex</a></li><li data-type='method'><a href="BigFloat.html#toFixed">toFixed</a></li><li data-type='method'><a href="BigFloat.html#toNumber">toNumber</a></li><li data-type='method'><a href="BigFloat.html#toString">toString</a></li><li data-type='method'><a href="BigFloat.html#toUint8Array">toUint8Array</a></li><li data-type='method'><a href="BigFloat.html#trunc">trunc</a></li><li data-type='method'><a href="BigFloat.html#visit">visit</a></li><li data-type='method'><a href="BigFloat.html#wraptypeh">wraptypeh</a></li><li data-type='method'><a href="BigFloat.html#xor">xor</a></li><li data-type='method'><a href="BigFloat.html#.fromString">fromString</a></li></ul></li><li><a href="BigFloat_BigFloat.html">BigFloat</a></li><li><a href="BigFraction.html">BigFraction</a><ul class='methods'><li data-type='method'><a href="BigFraction.html#abs">abs</a></li><li data-type='method'><a href="BigFraction.html#acos">acos</a></li><li data-type='method'><a href="BigFraction.html#acosh">acosh</a></li><li data-type='method'><a href="BigFraction.html#add">add</a></li><li data-type='method'><a href="BigFraction.html#asin">asin</a></li><li data-type='method'><a href="BigFraction.html#asinh">asinh</a></li><li data-type='method'><a href="BigFraction.html#atan">atan</a></li><li data-type='method'><a href="BigFraction.html#atanh">atanh</a></li><li data-type='method'><a href="BigFraction.html#cmp">cmp</a></li><li data-type='method'><a href="BigFraction.html#cos">cos</a></li><li data-type='method'><a href="BigFraction.html#cosh">cosh</a></li><li data-type='method'><a href="BigFraction.html#div">div</a></li><li data-type='method'><a href="BigFraction.html#equals">equals</a></li><li data-type='method'><a href="BigFraction.html#exp">exp</a></li><li data-type='method'><a href="BigFraction.html#floor">floor</a></li><li data-type='method'><a href="BigFraction.html#isAlmostZero">isAlmostZero</a></li><li data-type='method'><a href="BigFraction.html#isNaN">isNaN</a></li><li data-type='method'><a href="BigFraction.html#isZero">isZero</a></li><li data-type='method'><a href="BigFraction.html#log">log</a></li><li data-type='method'><a href="BigFraction.html#mul">mul</a></li><li data-type='method'><a href="BigFraction.html#neg">neg</a></li><li data-type='method'><a href="BigFraction.html#operatorAdd">operatorAdd</a></li><li data-type='method'><a href="BigFraction.html#operatorDiv">operatorDiv</a></li><li data-type='method'><a href="BigFraction.html#operatorEqual">operatorEqual</a></li><li data-type='method'><a href="BigFraction.html#operatorGreater">operatorGreater</a></li><li data-type='method'><a href="BigFraction.html#operatorGreaterEqual">operatorGreaterEqual</a></li><li data-type='method'><a href="BigFraction.html#operatorLess">operatorLess</a></li><li data-type='method'><a href="BigFraction.html#operatorLessEqual">operatorLessEqual</a></li><li data-type='method'><a href="BigFraction.html#operatorMul">operatorMul</a></li><li data-type='method'><a href="BigFraction.html#operatorNeg">operatorNeg</a></li><li data-type='method'><a href="BigFraction.html#operatorNotEqual">operatorNotEqual</a></li><li data-type='method'><a href="BigFraction.html#operatorPow">operatorPow</a></li><li data-type='method'><a href="BigFraction.html#operatorSub">operatorSub</a></li><li data-type='method'><a href="BigFraction.html#pow">pow</a></li><li data-type='method'><a href="BigFraction.html#sin">sin</a></li><li data-type='method'><a href="BigFraction.html#sinh">sinh</a></li><li data-type='method'><a href="BigFraction.html#sqrt">sqrt</a></li><li data-type='method'><a href="BigFraction.html#sub">sub</a></li><li data-type='method'><a href="BigFraction.html#tan">tan</a></li><li data-type='method'><a href="BigFraction.html#tanh">tanh</a></li><li data-type='method'><a href="BigFraction.html#toBigFloat">toBigFloat</a></li><li data-type='method'><a href="BigFraction.html#toNumber">toNumber</a></li><li data-type='method'><a href="BigFraction.html#toString">toString</a></li><li data-type='method'><a href="BigFraction.html#.fromString">fromString</a></li></ul></li><li><a href="BigFraction_BigFraction.html">BigFraction</a></li><li><a href="Complex.html">Complex</a><ul class='methods'><li data-type='method'><a href="Complex.html#abs">abs</a></li><li data-type='method'><a href="Complex.html#acos">acos</a></li><li data-type='method'><a href="Complex.html#acosh">acosh</a></li><li data-type='method'><a href="Complex.html#add">add</a></li><li data-type='method'><a href="Complex.html#arg">arg</a></li><li data-type='method'><a href="Complex.html#asin">asin</a></li><li data-type='method'><a href="Complex.html#asinh">asinh</a></li><li data-type='method'><a href="Complex.html#atan">atan</a></li><li data-type='method'><a href="Complex.html#atanh">atanh</a></li><li data-type='method'><a href="Complex.html#conj">conj</a></li><li data-type='method'><a href="Complex.html#cos">cos</a></li><li data-type='method'><a href="Complex.html#cosh">cosh</a></li><li data-type='method'><a href="Complex.html#div">div</a></li><li data-type='method'><a href="Complex.html#equals">equals</a></li><li data-type='method'><a href="Complex.html#exp">exp</a></li><li data-type='method'><a href="Complex.html#isAlmostZero">isAlmostZero</a></li><li data-type='method'><a href="Complex.html#isZero">isZero</a></li><li data-type='method'><a href="Complex.html#log">log</a></li><li data-type='method'><a href="Complex.html#mul">mul</a></li><li data-type='method'><a href="Complex.html#neg">neg</a></li><li data-type='method'><a href="Complex.html#pow">pow</a></li><li data-type='method'><a href="Complex.html#sin">sin</a></li><li data-type='method'><a href="Complex.html#sinh">sinh</a></li><li data-type='method'><a href="Complex.html#sqrt">sqrt</a></li><li data-type='method'><a href="Complex.html#sub">sub</a></li><li data-type='method'><a href="Complex.html#tan">tan</a></li><li data-type='method'><a href="Complex.html#tanh">tanh</a></li><li data-type='method'><a href="Complex.html#toString">toString</a></li><li data-type='method'><a href="Complex.html#.fromPolar">fromPolar</a></li><li data-type='method'><a href="Complex.html#.fromString">fromString</a></li></ul></li><li><a href="Poly.html">Poly</a><ul class='methods'><li data-type='method'><a href="Poly.html#acos">acos</a></li><li data-type='method'><a href="Poly.html#add">add</a></li><li data-type='method'><a href="Poly.html#asin">asin</a></li><li data-type='method'><a href="Poly.html#atan">atan</a></li><li data-type='method'><a href="Poly.html#cos">cos</a></li><li data-type='method'><a href="Poly.html#degree">degree</a></li><li data-type='method'><a href="Poly.html#deriv">deriv</a></li><li data-type='method'><a href="Poly.html#div">div</a></li><li data-type='method'><a href="Poly.html#equals">equals</a></li><li data-type='method'><a href="Poly.html#eval">eval</a></li><li data-type='method'><a href="Poly.html#exp">exp</a></li><li data-type='method'><a href="Poly.html#integ">integ</a></li><li data-type='method'><a href="Poly.html#log">log</a></li><li data-type='method'><a href="Poly.html#mul">mul</a></li><li data-type='method'><a href="Poly.html#neg">neg</a></li><li data-type='method'><a href="Poly.html#operatorAdd">operatorAdd</a></li><li data-type='method'><a href="Poly.html#operatorDiv">operatorDiv</a></li><li data-type='method'><a href="Poly.html#operatorMul">operatorMul</a></li><li data-type='method'><a href="Poly.html#operatorNeg">operatorNeg</a></li><li data-type='method'><a href="Poly.html#operatorPow">operatorPow</a></li><li data-type='method'><a href="Poly.html#operatorSub">operatorSub</a></li><li data-type='method'><a href="Poly.html#pow">pow</a></li><li data-type='method'><a href="Poly.html#powSeries">powSeries</a></li><li data-type='method'><a href="Poly.html#sin">sin</a></li><li data-type='method'><a href="Poly.html#sub">sub</a></li><li data-type='method'><a href="Poly.html#tan">tan</a></li><li data-type='method'><a href="Poly.html#toString">toString</a></li><li data-type='method'><a href="Poly.html#valuation">valuation</a></li><li data-type='method'><a href="Poly.html#.O">O</a></li><li data-type='method'><a href="Poly.html#.X">X</a></li></ul></li><li><a href="Scalar.html">Scalar</a><ul class='methods'><li data-type='method'><a href="Scalar.html#abs">abs</a></li><li data-type='method'><a href="Scalar.html#acos">acos</a></li><li data-type='method'><a href="Scalar.html#acosh">acosh</a></li><li data-type='method'><a href="Scalar.html#add">add</a></li><li data-type='method'><a href="Scalar.html#asin">asin</a></li><li data-type='method'><a href="Scalar.html#asinh">asinh</a></li><li data-type='method'><a href="Scalar.html#atan">atan</a></li><li data-type='method'><a href="Scalar.html#atanh">atanh</a></li><li data-type='method'><a href="Scalar.html#cmp">cmp</a></li><li data-type='method'><a href="Scalar.html#cos">cos</a></li><li data-type='method'><a href="Scalar.html#cosh">cosh</a></li><li data-type='method'><a href="Scalar.html#div">div</a></li><li data-type='method'><a href="Scalar.html#equals">equals</a></li><li data-type='method'><a href="Scalar.html#exp">exp</a></li><li data-type='method'><a href="Scalar.html#isAlmostZero">isAlmostZero</a></li><li data-type='method'><a href="Scalar.html#isZero">isZero</a></li><li data-type='method'><a href="Scalar.html#log">log</a></li><li data-type='method'><a href="Scalar.html#mul">mul</a></li><li data-type='method'><a href="Scalar.html#neg">neg</a></li><li data-type='method'><a href="Scalar.html#operatorAdd">operatorAdd</a></li><li data-type='method'><a href="Scalar.html#operatorDiv">operatorDiv</a></li><li data-type='method'><a href="Scalar.html#operatorMul">operatorMul</a></li><li data-type='method'><a href="Scalar.html#operatorNeg">operatorNeg</a></li><li data-type='method'><a href="Scalar.html#operatorPow">operatorPow</a></li><li data-type='method'><a href="Scalar.html#operatorSub">operatorSub</a></li><li data-type='method'><a href="Scalar.html#pow">pow</a></li><li data-type='method'><a href="Scalar.html#sin">sin</a></li><li data-type='method'><a href="Scalar.html#sinh">sinh</a></li><li data-type='method'><a href="Scalar.html#sqrt">sqrt</a></li><li data-type='method'><a href="Scalar.html#sub">sub</a></li><li data-type='method'><a href="Scalar.html#tan">tan</a></li><li data-type='method'><a href="Scalar.html#tanh">tanh</a></li><li data-type='method'><a href="Scalar.html#toString">toString</a></li><li data-type='method'><a href="Scalar.html#.fromString">fromString</a></li><li data-type='method'><a href="Scalar.html#.getLevel">getLevel</a></li><li data-type='method'><a href="Scalar.html#.promote">promote</a></li></ul></li></ul><h3>Global</h3><ul><li><a href="global.html#E">E</a></li><li><a href="global.html#Flags">Flags</a></li><li><a href="global.html#O">O</a></li><li><a href="global.html#PI">PI</a></li><li><a href="global.html#X">X</a></li><li><a href="global.html#abs">abs</a></li><li><a href="global.html#acos">acos</a></li><li><a href="global.html#asin">asin</a></li><li><a href="global.html#atan">atan</a></li><li><a href="global.html#atan2">atan2</a></li><li><a href="global.html#bf">bf</a></li><li><a href="global.html#bigIntSqrt">bigIntSqrt</a></li><li><a href="global.html#ceil">ceil</a></li><li><a href="global.html#complex">complex</a></li><li><a href="global.html#cos">cos</a></li><li><a href="global.html#decimal_precision">decimal_precision</a></li><li><a href="global.html#exp">exp</a></li><li><a href="global.html#floor">floor</a></li><li><a href="global.html#fminbnd">fminbnd</a></li><li><a href="global.html#formatDecimal">formatDecimal</a></li><li><a href="global.html#fpround">fpround</a></li><li><a href="global.html#frac">frac</a></li><li><a href="global.html#fromDouble">fromDouble</a></li><li><a href="global.html#fzero">fzero</a></li><li><a href="global.html#gc_ele_limit">gc_ele_limit</a></li><li><a href="global.html#gcd">gcd</a></li><li><a href="global.html#globalFlag">globalFlag</a></li><li><a href="global.html#half">half</a></li><li><a href="global.html#init">init</a></li><li><a href="global.html#is_ready">is_ready</a></li><li><a href="global.html#libbf">libbf</a></li><li><a href="global.html#log">log</a></li><li><a href="global.html#max">max</a></li><li><a href="global.html#minus_one">minus_one</a></li><li><a href="global.html#neg">neg</a></li><li><a href="global.html#ode45">ode45</a></li><li><a href="global.html#one">one</a></li><li><a href="global.html#poly">poly</a></li><li><a href="global.html#polyStr">polyStr</a></li><li><a href="global.html#polyfit">polyfit</a></li><li><a href="global.html#polyval">polyval</a></li><li><a href="global.html#pop_precision">pop_precision</a></li><li><a href="global.html#pow">pow</a></li><li><a href="global.html#precision">precision</a></li><li><a href="global.html#push_decimal_precision">push_decimal_precision</a></li><li><a href="global.html#push_precision">push_precision</a></li><li><a href="global.html#romberg">romberg</a></li><li><a href="global.html#roots">roots</a></li><li><a href="global.html#round">round</a></li><li><a href="global.html#scalar">scalar</a></li><li><a href="global.html#setGlobalFlag">setGlobalFlag</a></li><li><a href="global.html#setPrecision">setPrecision</a></li><li><a href="global.html#setThrowExceptionOnInvalidOp">setThrowExceptionOnInvalidOp</a></li><li><a href="global.html#set_gc_ele_limit">set_gc_ele_limit</a></li><li><a href="global.html#sign">sign</a></li><li><a href="global.html#sin">sin</a></li><li><a href="global.html#solveLinearSystem">solveLinearSystem</a></li><li><a href="global.html#sqrt">sqrt</a></li><li><a href="global.html#tan">tan</a></li><li><a href="global.html#three">three</a></li><li><a href="global.html#throwExceptionOnInvalidOp">throwExceptionOnInvalidOp</a></li><li><a href="global.html#trunc">trunc</a></li><li><a href="global.html#two">two</a></li><li><a href="global.html#zero">zero</a></li></ul>
+    
+</nav>
+
+<div id="main">
+    
+    <h1 class="page-title">fminbnd.js</h1>
+    
+
+    
+
+
+
+    
+    <section>
+        <article>
+            <pre class="prettyprint source linenums"><code>import * as bfjs from "./bf.js";
+
+/**
+ * High-precision Function Minimization using Brent's Method (similar to MATLAB's fminbnd).
+ *
+ * This algorithm finds a local minimum of a function of one variable within a fixed interval.
+ * It combines Golden Section Search (linear convergence) with Parabolic Interpolation 
+ * (superlinear convergence) for reliability and speed.
+ *
+ * @param {Function} f - The objective function to minimize.
+ *        Must accept a BigFloat argument and return a BigFloat result.
+ *
+ * @param {number|string|BigFloat} _ax - The start of the search interval.
+ * @param {number|string|BigFloat} _bx - The end of the search interval.
+ *
+ *
+ * @param {Object} [info={}] - Configuration and Status object.
+ *        Updates in-place with statistics (iterations, execution time, error estimate).
+ *        // --- Input Configuration Properties ---
+ * @param {number|string|BigFloat} [info._e=1e-30] - Absolute Error Tolerance.
+ *
+ * @param {number|string|BigFloat} [info._re=info._e] - Relative Error Tolerance.
+ *        The convergence criteria is based on the position x, not the function value.
+ *        tol = |x| * _re + _e
+ * @param {number} [info.max_step=500] - Maximum number of iterations allowed.
+ *        If this limit is reached without convergence, the function returns null and logs a warning.
+ * @param {number} [info.max_time=60000] - Maximum execution time in milliseconds.
+ *        Prevents the function from hanging in infinite loops or extremely slow computations.
+ * @param {Function} [info.cb] - Optional callback function.
+ *        If defined, this function is called after every iteration. Useful for updating UI progress or logging.
+ * @param {boolean} [info.debug] - Optional flag to enable debug logging (implementation dependent).
+ *
+ *        // --- Output Status Properties (Updated during execution) ---
+ * @param {BigFloat|null} info.result - The final found root.
+ *        Returns a BigFloat if converged, or null if failed.
+ * @param {BigFloat} info.lastresult - The result of the last iteration (current best guess `b`).
+ *        Even if convergence fails, this contains the value closest to the root when execution stopped.
+ * @param {string} info.eff_result - String representation of the result based on effective precision.
+ *        Generated by truncating `lastresult` according to `eff_decimal_precision`.
+ * @param {number} info.steps - The number of iterations currently executed.
+ * @param {number} info.exectime - The elapsed execution time in milliseconds.
+ * @param {BigFloat} info.error - The estimated error bound.
+ *        Typically represents half the width of the current search interval (`xm`).
+ * @param {BigFloat} info.residual - The absolute value of the function at the current best guess: `|f(x)|`.
+ *        Ideally, this value should be close to zero.
+ * @param {number} info.eff_decimal_precision - Estimated number of significant decimal digits.
+ *        Calculated as `-log10(error)`.
+ * @param {Function} info.toString - Helper method.
+ *        Returns a formatted string containing steps, error, residual, and execution time.
+ * 
+ * @returns {BigFloat|null}
+ *        Returns the BigFloat x where f(x) is minimized.
+ *        Returns `null` if max steps or time limit exceeded.
+ */
+export function fminbnd(f, _ax, _bx, info = {}) {
+    let _e  = info._e ?? 1e-30;
+    let _re = info._re ?? _e;
+
+    // 1. Configuration &amp; Constants
+    let max_step = info.max_step || 500, // Minimization often takes more steps than root finding
+        max_time = info.max_time || 60000;
+
+    if (typeof(_e) !== 'number' || typeof(_re) !== 'number' || typeof(info) !== "object") {
+        throw new Error("arguments error");
+    }
+
+    const start_time = new Date().getTime();
+
+    // Cache BigFloat constants
+    const bf_zero = bfjs.zero;
+    const bf_one = bfjs.one;
+    const bf_two = bfjs.two;
+    const bf_half = bfjs.half;
+    
+    // Golden Section Ratio: (3 - sqrt(5)) / 2  ≈ 0.381966011...
+    // We calculate it at runtime to match current precision
+    const bf_golden = bfjs.three.sub(bfjs.bf(5).sqrt()).mul(bf_half);
+
+    // Initial Interval
+    let a = bfjs.bf(_ax);
+    let b = bfjs.bf(_bx);
+    
+    // Ensure a &lt; b
+    if (a.cmp(b) > 0) {
+        let temp = a; a = b; b = temp;
+    }
+
+    // Initialization of Brent's variables
+    // x: is the point with the very least function value found so far
+    // w: is the point with the second least function value
+    // v: is the previous value of w
+    // u: is the point at which the function has been evaluated most recently
+    
+    // Start x, w, v at: a + golden_ratio * (b - a)
+    let c = b.sub(a);
+    let x = a.add(c.mul(bf_golden));
+    let w = x;
+    let v = x;
+
+    let fx = f(x);
+    let fw = fx;
+    let fv = fx;
+
+    let d = bf_zero; // Step taken in the iteration before last
+    let e = bf_zero; // Step taken in the last iteration
+
+    // Tolerances
+    let tol_act = bfjs.bf(_e);
+    let tol_rel = bfjs.bf(_re);
+
+    // Helper to sync local variables to info object
+    const updateInfo = (iter, errorBound, currentMinVal) => {
+        info.exectime = new Date().getTime() - start_time;
+        info.steps = iter;
+        info.lastresult = x; // Current best position
+        info.min_value = currentMinVal; // Current best function value
+        info.error = errorBound; // Interval width or step estimate
+
+        // Calculate effective decimal precision of the position x
+        if (errorBound.cmp(bf_zero) === 0) {
+             info.eff_decimal_precision = bfjs.decimal_precision();
+        } else {
+             info.eff_decimal_precision = Math.floor(-errorBound.log().f64() / Math.log(10));
+        }
+
+        if (info.eff_decimal_precision &lt;= 0) {
+            info.eff_decimal_precision = 0;
+            info.eff_result = '';
+        } else {
+            let limit = bfjs.decimal_precision();
+            let prec = info.eff_decimal_precision > limit ? limit : info.eff_decimal_precision;
+            info.eff_result = x.toString(10, prec);
+        }
+    };
+
+    info.toString = function() {
+        return `xmin=${this.eff_result}, 
+      f(xmin)=${this.min_value ? this.min_value.toString(10, 6) : 'N/A'},
+      steps=${this.steps}/${max_step}, 
+      error=${this.error ? this.error.toString(10, 3) : 'N/A'},
+      exectime=${this.exectime}/${max_time}`;
+    };
+
+    // 2. Main Loop
+    for (let iter = 1; iter &lt;= max_step; ++iter) {
+        
+        // Midpoint of current interval
+        let xm = a.add(b).mul(bf_half);
+        
+        // Calculate tolerance based on current x magnitude
+        // tol1 = |x| * tol_rel + tol_act
+        let tol1 = x.abs().mul(tol_rel).add(tol_act);
+        let tol2 = tol1.mul(bf_two);
+
+        // Check for Convergence
+        // Stop if the interval |b-a| is small enough (roughly &lt; 2*tol)
+        // Strictly: |x - xm| &lt;= (2*tol1 - 0.5*(b-a))
+        // Simplified robust check: Is max distance from x to a or b &lt;= 2*tol1?
+        let dist = x.sub(xm).abs().add(b.sub(a).mul(bf_half));
+        
+        if (dist.cmp(tol2) &lt;= 0) {
+            updateInfo(iter, dist, fx);
+            info.result = x;
+            return x;
+        }
+
+        // Callback and Timeout Check
+        if (info.cb) {
+            updateInfo(iter, dist, fx);
+            info.cb();
+        }
+        if (new Date().getTime() - start_time > max_time) {
+            updateInfo(iter, dist, fx);
+            console.log("fminbnd: Timeout reached.");
+            info.result = null;
+            return null;
+        }
+
+        // --- Determine Step ---
+        let p = bf_zero;
+        let q = bf_zero;
+        let r = bf_zero;
+        let new_step = bf_zero;
+
+        // Is Parabolic Interpolation possible?
+        // Needs |e| > tol1 (previous step was significant)
+        if (e.abs().cmp(tol1) > 0) {
+            // Parabolic fit using x, w, v
+            // r = (x - w) * (fx - fv)
+            // q = (x - v) * (fx - fw)
+            // p = (x - v) * q - (x - w) * r
+            // q = 2.0 * (q - r)
+            
+            r = x.sub(w).mul(fx.sub(fv));
+            q = x.sub(v).mul(fx.sub(fw));
+            p = x.sub(v).mul(q).sub(x.sub(w).mul(r));
+            q = q.sub(r).mul(bf_two);
+
+            if (q.cmp(bf_zero) > 0) {
+                p = p.neg();
+            }
+            q = q.abs();
+
+            let etemp = e;
+            e = d;
+
+            // Check if parabolic fit is acceptable
+            // 1. p must be within interval (a, b) specific bounds: |p| &lt; |q * 0.5 * (a/b - x)|
+            //    Strictly: (abs(p) &lt; abs(0.5*q*etemp)) AND (p > q*(a-x)) AND (p &lt; q*(b-x))
+            // 2. Step size must be shrinking
+            
+            let is_parabolic_valid = true;
+            
+            // Condition 1: Step smaller than half of previous-previous step? (Convergence check)
+            if (p.abs().cmp(q.mul(etemp).abs().mul(bf_half)) >= 0) {
+                is_parabolic_valid = false;
+            } 
+            // Condition 2: Must land within (a, b)
+            // p/q calculates the offset from x. x + p/q must be in [a, b]
+            // Actually, we usually require it to be within [a+tol, b-tol]
+            else {
+                let p_bound_a = q.mul(a.sub(x));
+                let p_bound_b = q.mul(b.sub(x));
+                
+                // Since q > 0, we can compare directly
+                if (p.cmp(p_bound_a) &lt;= 0 || p.cmp(p_bound_b) >= 0) {
+                    is_parabolic_valid = false;
+                }
+            }
+
+            if (is_parabolic_valid) {
+                // Accept Parabolic Step
+                d = p.div(q);
+                new_step = d;
+                
+                // If step lands very close to bounds, adjust to ensure we don't violate precision
+                let u_tentative = x.add(d);
+                if (u_tentative.sub(a).cmp(tol2) &lt; 0 || b.sub(u_tentative).cmp(tol2) &lt; 0) {
+                    // d = sign(xm - x) * tol1
+                    let sign = xm.sub(x).cmp(bf_zero) >= 0 ? bf_one : bf_one.neg();
+                    d = tol1.mul(sign);
+                }
+            } else {
+                // Reject Parabolic, switch to Golden Section
+                e = (x.cmp(xm) >= 0 ? a : b).sub(x);
+                d = bf_golden.mul(e);
+            }
+        } else {
+            // Golden Section Step (first iteration or small steps)
+            e = (x.cmp(xm) >= 0 ? a : b).sub(x);
+            d = bf_golden.mul(e);
+        }
+
+        // --- Apply Step ---
+        // Ensure we move at least tol1 to allow convergence check to pass eventually
+        // u = x + d (if |d| >= tol1) else x + sign(d)*tol1
+        if (d.abs().cmp(tol1) >= 0) {
+            new_step = d;
+        } else {
+            let sign = d.cmp(bf_zero) >= 0 ? bf_one : bf_one.neg();
+            new_step = tol1.mul(sign);
+        }
+        
+        let u = x.add(new_step);
+        let fu = f(u);
+
+        // --- Update Brackets (a, b) and Points (x, w, v) ---
+        if (fu.cmp(fx) &lt;= 0) {
+            // Found a new minimum!
+            if (u.cmp(x) >= 0) {
+                a = x;
+            } else {
+                b = x;
+            }
+            v = w; fv = fw;
+            w = x; fw = fx;
+            x = u; fx = fu;
+        } else {
+            // Not a new minimum, but use it to tighten interval
+            if (u.cmp(x) &lt; 0) {
+                a = u;
+            } else {
+                b = u;
+            }
+            
+            // Should we update w or v?
+            if (fu.cmp(fw) &lt;= 0 || w.cmp(x) === 0) {
+                v = w; fv = fw;
+                w = u; fw = fu;
+            } else if (fu.cmp(fv) &lt;= 0 || v.cmp(x) === 0 || v.cmp(w) === 0) {
+                v = u; fv = fu;
+            }
+        }
+    }
+
+    // 3. Exit (Max steps)
+    let final_dist = x.sub(a.add(b).mul(bf_half)).abs().add(b.sub(a).mul(bf_half));
+    updateInfo(max_step, final_dist, fx);
+    
+    console.log(`fminbnd: Failed to converge after ${max_step} steps.`);
+    info.result = null;
+    return null;
+}</code></pre>
+        </article>
+    </section>
+
+
+
+
+    
+    
+</div>
+
+<br class="clear">
+
+<footer>
+    Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 4.0.5</a> on Mon Feb 16 2026 13:49:12 GMT+0800 (中国标准时间) using the <a href="https://github.com/clenemt/docdash">docdash</a> theme.
+</footer>
+
+<script>prettyPrint();</script>
+<script src="scripts/polyfill.js"></script>
+<script src="scripts/linenumber.js"></script>
+
+
+
+</body>
+</html>

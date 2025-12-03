@@ -1,0 +1,30 @@
+{
+  "name": "bfjs",
+  "version": "0.1.0",
+  "description": "libbf emscriptened.",
+  "main": "dist/bf.cjs",
+  "module": "dist/bf.mjs",
+  "browser": "dist/bf.browser.js",
+  "types": "dist/bf.d.ts",
+  "scripts": {
+    "test": "jest",
+    "doc:html": "jsdoc -c jsdoc.json",
+    "prebuild": "npm run build:types",
+    "build:types": "tsc -p .",
+    "build": "esbuild src/bf.js --bundle --outfile=dist/bf.mjs --format=esm --external:fs --external:path --external:util && esbuild src/bf.js --bundle --outfile=dist/bf.cjs --format=cjs --platform=node && esbuild src/bf.js --bundle --outfile=dist/bf.browser.js --format=iife --global-name=bfjs --external:fs --external:path --external:util"
+  },
+  "keywords": [
+    "bf",
+    "webassembly"
+  ],
+  "author": "",
+  "license": "MIT",
+  "devDependencies": {
+    "docdash": "^2.0.2",
+    "dts-bundle-generator": "^9.5.1",
+    "esbuild": "^0.27.2",
+    "jest": "^30.2.0",
+    "jsdoc": "^4.0.5",
+    "typescript": "^5.9.3"
+  }
+}

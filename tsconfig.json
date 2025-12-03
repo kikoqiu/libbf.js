@@ -1,0 +1,15 @@
+{
+  "compilerOptions": {
+    "skipLibCheck": true,
+    "lib": ["es2017", "dom"],
+    "allowJs": true,
+    "declaration": true,
+    "emitDeclarationOnly": true,
+    "outFile": "dist/bf.d.ts",
+    "module": "system",
+    "strict": true,
+    "esModuleInterop": true
+  },
+  "include": ["src/**/*.js"],
+  "exclude": ["node_modules", "dist"]
+}

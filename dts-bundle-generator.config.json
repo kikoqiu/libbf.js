@@ -1,0 +1,9 @@
+{
+    "entries": [
+        {
+            "filePath": "./dist/types/bf.d.ts",
+            "outFile": "./dist/bf.d.ts",
+            "noCheck": true
+        }
+    ]
+}
