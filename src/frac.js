@@ -94,10 +94,58 @@ const fromDouble = (val) => {
         den = 1n << (-shift);
     }
 
-    // Apply Sign
-    if (sign < 0n) num = -num;
+     // Default to the exact unreduced fraction from IEEE 754
+    let resultNum = num;
+    let resultDen = den;
 
-    return { n: num, d: den };
+    // Try to reduce fraction to the smallest numerator/denominator within float precision
+    if (den !== 1n) {
+        const absVal = Math.abs(val);
+        // 2^53 - 1
+        const MAX_SAFE = BigInt(Number.MAX_SAFE_INTEGER); 
+        
+        // Continued fraction convergents
+        let n0 = 0n, d0 = 1n;
+        let n1 = 1n, d1 = 0n;
+        
+        let remN = num;
+        let remD = den;
+        
+        while (remD !== 0n) {
+            const a = remN / remD;       // Integer quotient (BigInt naturally truncates)
+            const nextN = remN % remD;   // Remainder
+            
+            // Calculate current convergent
+            const n2 = a * n1 + n0;
+            const d2 = a * d1 + d0;
+            
+            // Truncation trigger:
+            // If the numerator or denominator length exceeds the max valid float precision,
+            // abort the reduction and fall back to the initial exact {num, den}.
+            // The caller will handle any further reduction if necessary.
+            if (n2 > MAX_SAFE || d2 > MAX_SAFE) {
+                break;
+            }
+            
+            // Check if current simplified fraction perfectly matches the float
+            if (Number(n2) / Number(d2) === absVal) {
+                resultNum = n2;
+                resultDen = d2;
+                break;
+            }
+            
+            // Advance convergents for the next iteration
+            remN = remD;
+            remD = nextN;
+            n0 = n1; d0 = d1;
+            n1 = n2; d1 = d2;
+        }
+    }
+
+    // Apply Sign
+    if (sign < 0n) resultNum = -resultNum;
+
+    return { n: resultNum, d: resultDen };
 };
 
 
@@ -114,7 +162,7 @@ export class BigFraction {
      * 2. Number (Integer): Direct BigInt conversion.
      * 3. String: "1.5", "1/2", "-5".
      * 4. BigInt / BigFraction.
-     * @param {BigFraction | bigint | number | string} [n] - The numerator or the whole value.
+     * @param {BigFraction | bigint | number | string | BigFloat} [n] - The numerator or the whole value.
      * @param {bigint | number | string} [d] - The denominator.
      */
     constructor(n, d) {
@@ -175,10 +223,25 @@ export class BigFraction {
                 den = den * den2;
             }
         } 
-        else {
+        else if(n instanceof BigFloat){
+            // Convert to string and parse as decimal
+            const str = n.toFixed(10);
+            let [intPart, fracPart] = str.split('.');
+            if(fracPart === undefined){
+                num = BigInt(intPart);
+                den = 1n;
+            } else {
+                fracPart = fracPart.replace(/0+$/, ''); // Remove trailing zeros
+                num = BigInt(intPart + fracPart);
+                den = 10n ** BigInt(fracPart.length);
+            }            
+        }
+        else if(typeN === 'undefined' || n === null) {
             // Default / Empty
             num = 0n;
             den = 1n;
+        }else{
+            throw new Error("Unsupported input type for BigFraction constructor");
         }
 
         // 3. Normalization & Simplification

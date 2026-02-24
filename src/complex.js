@@ -1,4 +1,4 @@
-import { BigFloat,bf,zero,half } from "./bf";
+import { BigFloat,bf,zero,one,half } from "./bf";
 /**
  * High-Precision Complex Number Utility Class.
  * Provides arithmetic and transcendental functions for complex numbers using BigFloat.
@@ -10,7 +10,7 @@ import { BigFloat,bf,zero,half } from "./bf";
 export class Complex {
     /**
      * @param {number|string|BigFloat|Complex} re - Real part or Complex object
-     * @param {number|string|BigFloat} [im=0] - Imaginary part
+     * @param {number|string|BigFloat} [im=undefined] - Imaginary part
      */
     constructor(re, im) {
         if (re instanceof Complex) {
@@ -18,7 +18,7 @@ export class Complex {
             this.im = re.im;
         } else {
             this.re = bf(re);
-            this.im = im === undefined ? bf(0) : bf(im);
+            this.im = im === undefined ? zero : bf(im);
         }
     }
 
@@ -50,6 +50,14 @@ export class Complex {
      * @returns {Complex}
      */
     mul(other) {
+        //fast path
+        if(other instanceof BigFloat || typeof(other)=="number"){
+            // (a+bi)(c) = (ac) + (bc)i
+            const b = other instanceof BigFloat ? other:bf(other);
+            const ac = this.re.mul(b);
+            const bc = this.im.mul(b);
+            return new Complex(ac, bc);
+        }
         const b = this._wrap(other);
         // (a+bi)(c+di) = (ac-bd) + (ad+bc)i
         const ac = this.re.mul(b.re);
@@ -65,18 +73,50 @@ export class Complex {
      * @returns {Complex}
      */
     div(other) {
+        //fast path
+        if(other instanceof BigFloat || typeof(other)=="number"){
+            // (a+bi)/(c) = [(ac) + (bc)i] / (c^2)
+            const b = other instanceof BigFloat ? other:bf(other);
+            const ac = this.re.mul(b);
+            const denom=b.mul(b);
+            ac.setdiv(ac,denom);
+            const bc = this.im.mul(b);
+            bc.setdiv(bc,denom);
+            return new Complex(ac, bc);
+        }
+        
         const b = this._wrap(other);
         // (a+bi)/(c+di) = [(ac+bd) + (bc-ad)i] / (c^2+d^2)
-        const denom = b.re.mul(b.re).add(b.im.mul(b.im));
-        if (denom.cmp(bf(0)) === 0) throw new Error("Complex division by zero");
-        
-        const ac = this.re.mul(b.re);
-        const bd = this.im.mul(b.im);
-        const bc = this.im.mul(b.re);
-        const ad = this.re.mul(b.im);
+        let tmpa=bf(undefined, 10, false, false),
+            tmpb=bf(undefined, 10, false, false);
 
-        const newRe = ac.add(bd).div(denom);
-        const newIm = bc.sub(ad).div(denom);
+        tmpa.setmul(b.re,b.re);
+        tmpb.setmul(b.im,b.im);
+
+        let denom = bf(undefined, 10, false, false).setadd(tmpa,tmpb);
+        
+        if (denom.isZero()) {
+            tmpa.dispose(false);
+            tmpb.dispose(false);
+            denom.dispose(false);
+            throw new Error("Complex division by zero");
+        }
+        
+        const ac = tmpa.setmul(this.re,b.re);
+        const bd = tmpb.setmul(this.im,b.im);
+        let newRe = ac.add(bd);
+        newRe.setdiv(newRe,denom);
+
+        const bc = tmpa.setmul(this.im,b.re);
+        const ad = tmpb.setmul(this.re,b.im);
+
+        
+        let newIm = bc.sub(ad);
+        newIm.setdiv(newIm, denom);
+
+        tmpa.dispose(false);
+        tmpb.dispose(false);
+        denom.dispose(false);
         return new Complex(newRe, newIm);
     }
 
@@ -103,7 +143,11 @@ export class Complex {
      * @returns {BigFloat}
      */
     abs() {
-        return this.re.mul(this.re).add(this.im.mul(this.im)).sqrt();
+        let a = this.re.mul(this.re);
+        let b = this.im.mul(this.im);
+        b.setadd(a,b);
+        a.setsqrt(b);
+        return a;
     }
 
     /**
@@ -120,8 +164,10 @@ export class Complex {
      */
     sqrt() {
         const r = this.abs();
-        const re = r.add(this.re).mul(half).sqrt();
-        const im = r.sub(this.re).mul(half).sqrt();
+        let re = r.add(this.re);
+        re = re.setmul(re,half).sqrt();
+        let im = r.sub(this.re);
+        im = im.setmul(im,half).sqrt();
         return new Complex(re, this.im.cmp(zero) >= 0 ? im : im.neg());
     }
 
@@ -153,10 +199,11 @@ export class Complex {
     sin() {
         const x = this.re;
         const y = this.im;
-        return new Complex(
-            x.sin().mul(y.cosh()),
-            x.cos().mul(y.sinh())
-        );
+        let re=x.sin();
+        re=re.setmul(re, y.cosh());
+        let im=x.cos();
+        im.setmul(im, y.sinh());
+        return new Complex(re,im);
     }
 
     /**
@@ -167,10 +214,12 @@ export class Complex {
     cos() {
         const x = this.re;
         const y = this.im;
-        return new Complex(
-            x.cos().mul(y.cosh()),
-            x.sin().mul(y.sinh()).neg()
-        );
+        let re=x.cos();
+        re=re.setmul(re,y.cosh());
+        let im=x.sin();
+        im.setmul(im,y.sinh());
+        im.setneg();
+        return new Complex(re,im);
     }
 
     /**
@@ -189,10 +238,11 @@ export class Complex {
     sinh() {
         const x = this.re;
         const y = this.im;
-        return new Complex(
-            x.sinh().mul(y.cos()),
-            x.cosh().mul(y.sin())
-        );
+        let re=x.sinh();
+        re.setmul(re,y.cos());
+        let im=x.cosh();
+        im.setmul(im,y.sin())
+        return new Complex(re,im);
     }
 
     /**
@@ -203,10 +253,11 @@ export class Complex {
     cosh() {
         const x = this.re;
         const y = this.im;
-        return new Complex(
-            x.cosh().mul(y.cos()),
-            x.sinh().mul(y.sin())
-        );
+        let re=x.cosh();
+        re.setmul(re,y.cos());
+        let im=x.sinh();
+        im.setmul(im,y.sin())
+        return new Complex(re,im);
     }
 
     /**
@@ -222,8 +273,8 @@ export class Complex {
      * @returns {Complex}
      */
     asin() {
-        const i = new Complex(0, 1);
-        const one = new Complex(1, 0);
+        const i = new Complex(zero, one);
+        const one = new Complex(one, zero);
         const iz = i.mul(this);
         const sqrtPart = one.sub(this.mul(this)).sqrt();
         return iz.add(sqrtPart).log().mul(i.neg());
@@ -234,8 +285,8 @@ export class Complex {
      * @returns {Complex}
      */
     acos() {
-        const i = new Complex(0, 1);
-        const one = new Complex(1, 0);
+        const i = new Complex(zero, one);
+        const one = new Complex(one, zero);
         const sqrtPart = one.sub(this.mul(this)).sqrt();
         return this.add(i.mul(sqrtPart)).log().mul(i.neg());
     }
@@ -245,8 +296,8 @@ export class Complex {
      * @returns {Complex}
      */
     atan() {
-        const i = new Complex(0, 1);
-        const halfI = new Complex(0, 0.5);
+        const i = new Complex(zero, one);
+        const halfI = new Complex(zero, half);
         const numerator = i.add(this);
         const denominator = i.sub(this);
         return numerator.div(denominator).log().mul(halfI.neg());
@@ -257,7 +308,7 @@ export class Complex {
      * @returns {Complex}
      */
     asinh() {
-        const one = new Complex(1, 0);
+        const one = new Complex(one, zero);
         return this.add(this.mul(this).add(one).sqrt()).log();
     }
 
@@ -266,7 +317,7 @@ export class Complex {
      * @returns {Complex}
      */
     acosh() {
-        const one = new Complex(1, 0);
+        const one = new Complex(one, zero);
         return this.add(this.mul(this).sub(one).sqrt()).log();
     }
 
@@ -275,8 +326,8 @@ export class Complex {
      * @returns {Complex}
      */
     atanh() {
-        const one = new Complex(1, 0);
-        const half = new Complex(0.5, 0);
+        const one = new Complex(one, zero);
+        const half = new Complex(half, zero);
         return one.add(this).div(one.sub(this)).log().mul(half);
     }
 
@@ -327,13 +378,13 @@ export class Complex {
     /**
      * Converts the complex number to a string.
      * @param {number} [base=10]
-     * @param {number} [precision=20]
+     * @param {number} [precision=-1]
      * @param {boolean} [pretty=false] pretty print
      * @returns {string}
      */
-    toString(base = 10, precision = 20, pretty=false) {
-        let rezero=this.re.isZero();
-        let imzero=this.im.isZero();
+    toString(base = 10, precision = -1, pretty=false) {
+        let rezero=pretty?this.re.isAlmostZero():this.re.isZero();
+        let imzero=pretty?this.im.isAlmostZero():this.im.isZero();
         if(rezero && imzero){
             return "0";
         }else if(imzero){

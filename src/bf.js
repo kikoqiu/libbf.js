@@ -136,10 +136,10 @@ function gc() {
 	gc_array = new Set(ele.slice(0, gcstartpos));
 	gcing = false;
 };
-var visit_index = 0;
+var visit_index = 1;
 function gc_track(f, addToArray = true){
 	f.visited = visit_index;
-	visit_index = (visit_index + 1) % (2 ** 32);
+	visit_index = ((visit_index + 1) & 0xffffffff) + 1;
 	if (addToArray) {
 		gc_array.add(f);
 		if (gc_array.size >= gc_ele_limit) {
@@ -162,11 +162,13 @@ function get_recycled_or_new() {
 	}
 	return libbf._new_();
 };
+
 /**
  * The current precision in bits.
  * @type {number}
+ * @private
  */
-export var precision = 500;
+export var precision = 352;
 
 /**
  * Set the global precision
@@ -176,19 +178,27 @@ export function setPrecision(p){
 	precision = p;
 }
 
+/**
+ * Get the global precision
+ * @returns {number}
+ */
+export function getPrecision(){
+	return precision;
+}
+
 var precision_array = [];
 /**
  * Pushes the current precision to the stack and sets a new precision.
  * @param {number} prec - The new precision in bits.
  */
-export function push_precision(prec) {
+export function pushPrecision(prec) {
 	precision_array.push(precision);
 	precision = prec;
 };
 /**
  * Pops the precision from the stack and restores the previous precision.
  */
-export function pop_precision() {
+export function popPrecision() {
 	if (precision.length) {
 		precision = precision_array.pop();
 	}
@@ -199,7 +209,7 @@ export function pop_precision() {
  * @param {number} [dp] - The new precision in decimal digits. If not provided, the function returns the current precision in decimal digits.
  * @returns {number | undefined}
  */
-export function decimal_precision(dp) {
+export function decimalPrecision(dp) {
 	if (dp != undefined) {
 		precision = Math.ceil(dp * Math.log2(10));
 	} else {
@@ -210,30 +220,51 @@ export function decimal_precision(dp) {
  * Pushes the current precision to the stack and sets a new precision in decimal digits.
  * @param {number} dp - The new precision in decimal digits.
  */
-export function push_decimal_precision(dp) {
-	push_precision(0);
-	decimal_precision(dp);
+export function pushDecimalPrecision(dp) {
+	pushPrecision(0);
+	decimalPrecision(dp);
 };
+
+let EPSILONS_cache=[];
+/**
+ * Gets the epsilon value for the current precision.
+ * @returns {number}
+ */
+export function getEpsilon(){
+	if(undefined===EPSILONS_cache[precision]){
+		EPSILONS_cache[precision]=bf().setEPSILON().f64();
+	}
+	return EPSILONS_cache[precision];
+}
 
 /**
  * The maximum number of elements before garbage collection is triggered.
  * @type {number}
+ * @private
  */
-export var gc_ele_limit = 200;//maxmum elements before gc
+export var gc_ele_limit = 4000;//maxmum elements before gc
 
 /**
  * Set gc_ele_limit
  * @param {number} l
  */
-export function set_gc_ele_limit(l){
+export function setGcEleLimit(l){
 	gc_ele_limit = l;
+}
+
+/**
+ * Get gc_ele_limit
+ * @returns {number}
+ */
+export function getGcEleLimit(){
+	return gc_ele_limit;
 }
 
 /**
  * Checks if the libbf library is ready.
  * @returns {boolean}
  */
-export function is_ready() {
+export function isReady() {
 	return !!libbf;
 };
 
@@ -260,8 +291,18 @@ export var libbf = null;
 /**
  * The global flags for libbf operations.
  * @type {number}
+ * @private
  */
 export var globalFlag = 0; /*bf_set_exp_bits(15) MAXMUM | */
+
+/**
+ * Get the global flags for libbf operations.
+ * @returns {number}
+ */
+export function getGlobalFlag(){
+	return globalFlag;
+}
+
 
 /**
  * Set the global flags for libbf operations.
@@ -347,7 +388,7 @@ const formatDecimal = (str,pretty=false) => {
   return `${intPart}.${newDecPart}`;
 };
 
-let EPSILONS_cache=[];
+
 /**
  * @class BigFloat
  * @description A class for arbitrary-precision floating-point arithmetic.
@@ -384,6 +425,7 @@ export class BigFloat {
 			default:
 				throw new Error('BigFloat: invalid constructor oprand ' + typeof (val));
 		}
+		this.visited = 0;
 		this.visit();
 		//set constant here
 		this.constant = constant;
@@ -952,22 +994,12 @@ export class BigFloat {
 		return libbf._is_zero_(this.geth());
 	}
 	/**
-	 * Checks if this BigFloat is almost zero.
+	 * Checks if this BigFloat is zero.
 	 * @returns {boolean}
 	 */
 	isZero() {
-		return this.isAlmostZero();
-		//return this.isExactZero();
-	}
-	/**
-	 * Gets the epsilon value for the current precision.
-	 * @returns {number}
-	 */
-	getEpsilon(){
-		if(undefined===EPSILONS_cache[precision]){
-			EPSILONS_cache[precision]=bf().setEPSILON().f64();
-		}
-		return EPSILONS_cache[precision];
+		//return this.isAlmostZero();
+		return this.isExactZero();
 	}
 
 	/**
@@ -975,7 +1007,7 @@ export class BigFloat {
 	 * @returns {boolean}
 	 */
 	isAlmostZero() {
-		return Math.abs(this.f64())<=this.getEpsilon();
+		return Math.abs(this.f64())<=getEpsilon();
 	}
 
 	/**
@@ -1375,6 +1407,64 @@ export class BigFloat {
 	 * @param {number} [prec=0] 
 	 * @returns {BigFloat}
 	 */
+    cosh(prec=0){
+		let exp=bf(undefined,10,false,false).setexp(this,prec);
+		
+		let one_div_exp=bf(undefined,10,false,false).setdiv(one,exp,prec);
+
+		let ret = bf(undefined).setadd(exp, one_div_exp, prec);
+		ret.setmul(ret, half, prec);
+
+		exp.dispose(false);
+		one_div_exp.dispose(false);
+
+		return ret;
+    }
+
+	/**
+	 * @param {number} [prec=0] 
+	 * @returns {BigFloat}
+	 */
+    sinh(prec=0){
+		let exp=bf(undefined,10,false,false).setexp(this,prec);
+		let one_div_exp=bf(undefined,10,false,false).setdiv(one,exp,prec);
+
+		let ret= bf(undefined).setsub(exp, one_div_exp, prec);
+		ret.setmul(ret, half, prec);
+
+		exp.dispose(false);
+		one_div_exp.dispose(false);
+
+		return ret;
+    }
+
+	/**
+	 * @param {number} [prec=0] 
+	 * @returns {BigFloat}
+	 */
+    tanh(prec=0){
+		let exp=bf(undefined,10,false,false).setexp(this,prec);
+
+		let one_div_exp=bf(undefined,10,false,false).setdiv(one,exp,prec);
+
+		let s=bf(undefined,10,false,false).setsub(exp, one_div_exp, prec);
+		let c=bf(undefined,10,false,false).setadd(exp, one_div_exp, prec);
+
+		let ret=bf(undefined).setdiv(s, c, prec);
+
+		exp.dispose(false);
+		one_div_exp.dispose(false);
+		s.dispose(false);
+		c.dispose(false);
+
+		return ret;
+    }
+
+
+	/**
+	 * @param {number} [prec=0] 
+	 * @returns {BigFloat}
+	 */
     tan(prec=0){
         return this.callFunc(this.settan,2,prec);
     }
@@ -1424,8 +1514,6 @@ BigFloat.prototype.operatorNeg = BigFloat.prototype.neg;
 BigFloat.prototype.operatorBitwiseAnd = BigFloat.prototype.and;
 BigFloat.prototype.operatorBitwiseOr = BigFloat.prototype.or;
 BigFloat.prototype.operatorBitwiseXor = BigFloat.prototype.xor;
-//BigFloat.prototype.operatorBitwiseLShift=BigFloat.prototype.mul2exp;
-//BigFloat.prototype.operatorBitwiseRShift=BigFloat.prototype.mul2exp;
 BigFloat.prototype.operatorBitwiseNot = BigFloat.prototype.not;
 
 
@@ -1442,22 +1530,82 @@ export function bf(val, radix = 10, managed=true, constant=false) {
 	return new BigFloat(val, radix, managed, constant);
 };
 
-/** @type {BigFloat | null} */
+/** 
+ * @type {BigFloat | null}
+ * @private
+ */
 export var minus_one=null;
-/** @type {BigFloat | null} */
+/** 
+ * @type {BigFloat | null} 
+ * @private
+*/
 export var zero=null;
-/** @type {BigFloat | null} */
+/** 
+ * @type {BigFloat | null} 
+ * @private
+*/
 export var half=null;
-/** @type {BigFloat | null} */
+/** 
+ * @type {BigFloat | null} 
+ * @private
+*/
 export var one=null;
-/** @type {BigFloat | null} */
+/** 
+ * @type {BigFloat | null} 
+ * @private
+*/
 export var two=null;
-/** @type {BigFloat | null} */
+/**
+ * @type {BigFloat | null} 
+ * @private
+*/
 export var three=null;
-/** @type {BigFloat | null} */
+/** 
+ * @type {BigFloat | null} 
+ * @private*/
 export var PI=null;
-/** @type {BigFloat | null} */
+/** 
+ * @type {BigFloat | null} 
+ * @private*/
 export var E=null;
+
+/**
+ * BigFloat Constants
+ */
+export const Constants={
+	/** @type {BigFloat | null} */
+	get minus_one(){
+		return minus_one;
+	},
+	/** @type {BigFloat | null} */
+	get zero(){
+		return zero;
+	},
+	/** @type {BigFloat | null} */
+	get half(){
+		return half;
+	},
+	/** @type {BigFloat | null} */
+	get one(){
+		return one;
+	},
+	/** @type {BigFloat | null} */
+	get two(){
+		return two;
+	},
+	/** @type {BigFloat | null} */
+	get three(){
+		return three;
+	},
+	/** @type {BigFloat | null} */
+	get PI(){
+		return PI;
+	},
+	/** @type {BigFloat | null} */
+	get E(){
+		return E;
+	}
+}
 
 let inited=false;
 /**
@@ -1489,10 +1637,25 @@ export async function init(m) {
  * @returns {BigFloat}
  */
 export function max(...args){
-	let t=args.map(v=>v instanceof BigFloat?v:bf(v));
+	args=args.map(v=>v instanceof BigFloat?v:bf(v));
 	let ret=args[0];
 	for(let i=1;i<args.length;++i){
 		if(args[i].cmp(ret)>0){
+			ret=args[i];
+		}
+	}
+	return ret;
+}
+
+/**
+ * @param {...(BigFloat | number | string | bigint)} args 
+ * @returns {BigFloat}
+ */
+export function min(...args){
+	args=args.map(v=>v instanceof BigFloat?v:bf(v));
+	let ret=args[0];
+	for(let i=1;i<args.length;++i){
+		if(args[i].cmp(ret)<0){
 			ret=args[i];
 		}
 	}
@@ -1673,15 +1836,55 @@ export function acos(v,prec=0) {
 	return bf(v).acos(prec);
 }
 
+function safe_bf(v){
+	return (v instanceof BigFloat)?v:bf(v);
+}
 
+/**
+ * 
+ * @param {BigFloat|Number|string} start 
+ * @param {BigFloat|Number|string} end 
+ * @param {Number} n
+ * @returns 
+ */
+export function linspace(start, end, n) {
+    const arr =[];
+	start = safe_bf(start);
+	end = safe_bf(end);
+	n = (typeof(n)=="number")?n:safe_bf(n).toNumber();
+
+    const step = end.sub(start) .div (n-1);
+    for (let i = 0; i < n; i++) arr.push(start .add( step.mul(i) ));
+    return arr;
+}
 
 export * from "./complex.js";
+export * from "./vector.js";
+export * from "./matrix.js";
+
 export * from "./polyfit.js";
 export * from "./ode45.js";
+export * from "./ode15s.js";
+export * from "./pdepe.js";
+
 export * from "./fminbnd.js";
 export * from "./roots.js";
 export * from "./fzero.js";
+
+export * from "./quad.js";
 export * from "./romberg.js";
+export * from "./limit.js";
+export * from "./nsum.js";
+export * from "./shanks.js";
+export * from "./identify.js";
+
+export * from "./bernoulli.js";
+export * from "./gamma.js";
+export * from "./zeta.js";
+export * from "./lambertw.js";
+export * from "./bessel.js";
+
+
 
 export * from "./frac.js";
 export * from "./poly.js";

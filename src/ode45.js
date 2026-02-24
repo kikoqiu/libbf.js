@@ -24,8 +24,10 @@
  *        Error control: |e| <= max(RelTol * |y|, AbsTol)
  * @param {number|string|BigFloat} [info.initial_step] - Initial step size guess. 
  *        If omitted, it is automatically estimated.
- * @param {number} [info.max_step=10000] - Maximum number of steps allowed.
- * @param {number} [info.max_time=60000] - Maximum execution time in milliseconds.
+ * @param {number} [info.progress] - log progress every info.progress*100% progress
+ * @param {number}[info.progressCb] - progress call back progressCb(pos:Number,t,y)
+ * @param {number} [info.max_step=2000000] - Maximum number of steps allowed.
+ * @param {number} [info.max_time=1200000] - Maximum execution time in milliseconds.
  * @param {Function} [info.cb] - Optional callback per step: cb(t, y).
  *
  *        // --- Output Status Properties ---
@@ -49,8 +51,8 @@ export function ode45(odefun, tspan, y0, info = {}) {
     let _e  = bfjs.bf(info._e ?? 1e-16);
     let _re = bfjs.bf(info._re ?? 1e-16);
     
-    let max_steps_limit = info.max_step || 100000; // Increased limit for high precision
-    let max_time = info.max_time || 60000;
+    let max_steps_limit = info.max_step || 2000000; // Increased limit for high precision
+    let max_time = info.max_time || 1200000;
 
     const start_time = new Date().getTime();
 
@@ -118,7 +120,28 @@ export function ode45(odefun, tspan, y0, info = {}) {
     let absTol = _e;
     let relTol = _re;
 
-    let direction = t_final.sub(t_start).sign(); 
+    let t_span = t_final.sub(t_start);
+    let direction = t_span.sign();
+
+    let test_progress=undefined;    
+    if(info.progress!==undefined){
+        let progress=info.progress;
+        if(progress<=0 || progress>=1){
+            progress=0.1;
+        }
+        let last_progress=0;
+        test_progress=(t,y)=>{
+            let pos=t.sub(t_start).div(t_span).f64();
+            if(pos-last_progress>=progress){                
+                last_progress=pos;                
+                if(info.progressCb){
+                    info.progressCb(pos,t,y);
+                }else{
+                    console.log(`Progress at progress=${(pos*100).toFixed(1)}%, y=${(Array.isArray(y)?y:[y]).map(x=>x.f64()).join(",")}`);
+                }
+            }
+        }
+    }
     
     // Automatic initial step size guess
     if (h.isZero()) {
@@ -234,6 +257,7 @@ export function ode45(odefun, tspan, y0, info = {}) {
             info.t.push(t);
             info.y.push(y_curr.map(v => v));
             if (info.cb) info.cb(t, y_curr);
+            if (test_progress!==undefined) test_progress(t,y_curr);
 
             if (last_step) {
                 done = true;
@@ -278,8 +302,6 @@ export function ode45(odefun, tspan, y0, info = {}) {
         }
     }
 
-    if (info.status === "running") info.status = "done";
-    
     info.exectime = new Date().getTime() - start_time;
     info.steps = steps;
     
@@ -287,5 +309,11 @@ export function ode45(odefun, tspan, y0, info = {}) {
         return `status=${this.status}, steps=${this.steps}, failed=${this.failed_steps}, t_final=${this.t[this.t.length-1].toString(10, 6)}`;
     };
 
-    return { t: info.t, y: info.y };
+    if (info.status === "running") {
+        info.status = "done";
+        return { t: info.t, y: info.y };
+    }
+
+    return null;
+
 }

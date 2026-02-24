@@ -15,6 +15,14 @@ async function init(){
  * @param {number} precision - decimal places
  */
 const expectBFCloseTo = (actual, expected, precision = 20) => {
+  if(actual===null){
+    throw new Error(`
+      Expected: ${expected.toString()}
+      Received: null
+      Tolerance: 1e-${precision}
+    `);
+  }
+
   const diff = bf(actual).sub(bf(expected)).abs();
   const tolerance = bf(10).pow(bf(-precision));
   

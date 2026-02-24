@@ -112,7 +112,7 @@ export function fzero(f, _a, _b, info = {}) {
         // Calculate effective decimal precision
         // Handle log(0) explicitly
         if (errorBound.cmp(bf_zero) === 0) {
-             info.eff_decimal_precision = bfjs.decimal_precision();
+             info.eff_decimal_precision = bfjs.decimalPrecision();
         } else {
              info.eff_decimal_precision = Math.floor(-errorBound.log().f64() / Math.log(10));
         }
@@ -121,7 +121,7 @@ export function fzero(f, _a, _b, info = {}) {
             info.eff_decimal_precision = 0;
             info.eff_result = '';
         } else {
-            let limit = bfjs.decimal_precision();
+            let limit = bfjs.decimalPrecision();
             let prec = info.eff_decimal_precision > limit ? limit : info.eff_decimal_precision;
             info.eff_result = b.toString(10, prec);
         }

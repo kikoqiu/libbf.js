@@ -7,7 +7,7 @@
   "browser": "dist/bf.browser.js",
   "types": "dist/bf.d.ts",
   "scripts": {
-    "test": "jest",
+    "test": "jest --verbose",
     "doc:html": "jsdoc -c jsdoc.json",
     "prebuild": "npm run build:types",
     "build:types": "tsc -p .",

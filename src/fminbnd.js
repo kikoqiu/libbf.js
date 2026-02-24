@@ -118,7 +118,7 @@ export function fminbnd(f, _ax, _bx, info = {}) {
 
         // Calculate effective decimal precision of the position x
         if (errorBound.cmp(bf_zero) === 0) {
-             info.eff_decimal_precision = bfjs.decimal_precision();
+             info.eff_decimal_precision = bfjs.decimalPrecision();
         } else {
              info.eff_decimal_precision = Math.floor(-errorBound.log().f64() / Math.log(10));
         }
@@ -127,7 +127,7 @@ export function fminbnd(f, _ax, _bx, info = {}) {
             info.eff_decimal_precision = 0;
             info.eff_result = '';
         } else {
-            let limit = bfjs.decimal_precision();
+            let limit = bfjs.decimalPrecision();
             let prec = info.eff_decimal_precision > limit ? limit : info.eff_decimal_precision;
             info.eff_result = x.toString(10, prec);
         }

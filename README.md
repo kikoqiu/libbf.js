@@ -11,13 +11,16 @@ A JavaScript library for arbitrary-precision floating-point, rational, and compl
 -   **Automatic Type Promotion (`Scalar`)**: A unified wrapper that automatically handles promotions between `BigFraction`, `BigFloat`, and `Complex` types during mixed-mode arithmetic.
 -   **High Performance**: Core calculations are executed in WebAssembly, compiled from the highly optimized C code of LibBF.
 
+## Document
+[https://kikoqiu.github.io/libbf.js/](https://kikoqiu.github.io/libbf.js/)
+
 ## Setup & Initialization
 
 The library relies on a WebAssembly (WASM) module for its core functionality. You must load and initialize this module before performing any calculations.
 
 ```javascript
 // Import the library's init function
-import { init, bf, decimal_precision } from 'bf.js';
+import { init, bf, decimalPrecision } from 'bf.js';
 
 async function main() {
     // 1. Load the Emscripten WASM module
@@ -32,14 +35,14 @@ async function main() {
     console.log('libbf.js is ready to use!');
 
     // 3. Start performing calculations
-    decimal_precision(100); // Set precision to 100 decimal places
+    decimalPrecision(100); // Set precision to 100 decimal places
 
     const a = bf('123.456');
     const b = bf('789.123');
     const c = a.mul(b);
 
     console.log(c.toString());
-    // Output: 97421.909928000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
+    // Output: 97421.969088000000000000000000000000000000000000000000000000000000000000000000000000000000000000000003
 }
 
 main();
@@ -52,7 +55,7 @@ main();
 The `BigFloat` class is the workhorse for high-precision real number arithmetic. Use the `bf()` factory function for convenience.
 
 ```javascript
-import { bf, PI, precision, pop_precision, push_precision } from 'bf.js';
+import { bf, Constants, precision, popPrecision, pushPrecision } from 'bf.js';
 
 // Set precision to 200 bits
 precision(200);
@@ -62,13 +65,13 @@ const a = bf(2).sqrt();
 console.log('sqrt(2) =', a.toString());
 
 // Use constants
-const pi = PI;
+const pi = Constants.PI;
 console.log('PI =', pi.toString());
 
 // Temporarily change precision
-push_precision(50);
-console.log('Low-precision PI =', PI.toString()); // Constants are re-evaluated at current precision
-pop_precision();
+pushPrecision(50);
+console.log('Low-precision PI =', Constants.PI.toString()); // Constants are re-evaluated at current precision
+popPrecision();
 
 console.log('Original PI =', pi.toString());
 ```
@@ -97,13 +100,13 @@ console.log(d.toString()); // Output: "3/4"
 The `Complex` class supports standard and transcendental operations on complex numbers.
 
 ```javascript
-import { complex } from 'bf.js';
+import { Constants, complex } from 'bf.js';
 
 // Create i
 const i = complex(0, 1);
 
 // Calculate e^(i*pi) = -1
-const euler = i.mul(PI).exp();
+const euler = i.mul(Constants.PI).exp();
 console.log(euler.toString()); // Output: (-1)
 
 // (-1)^(0.5) = i
@@ -170,7 +173,7 @@ import { fminbnd } from 'bf.js';
 
 async function runFminbnd() {
     // Assume bf.js is initialized and precision is set
-    // decimal_precision(50); 
+    // decimalPrecision(50); 
 
     const f = (x) => x.mul(x).sub(bf(4).mul(x)).add(bf(5)); // f(x) = x^2 - 4x + 5 (minimum at x=2)
     const ax = bf(0);
@@ -201,7 +204,7 @@ import { fzero } from 'bf.js';
 
 async function runFzero() {
     // Assume bf.js is initialized and precision is set
-    // decimal_precision(50); 
+    // decimalPrecision(50); 
 
     const f = (x) => x.mul(x).sub(bf(2)); // f(x) = x^2 - 2 (roots at +/- sqrt(2))
     const a = bf(1);
@@ -286,12 +289,43 @@ async function runPolyfit() {
 // runPolyfit();
 ```
 
-### `romberg(f, a, b, info)` (also aliased as `integral`)
+### `quad(f, a, b, info)`
+
+Computes the definite integral of a function `f(x)` from `a` to `b` using Tanh-Sinh Quadrature.
+
+```javascript
+import { bf, Constants } from 'bf.js';
+import { quad } from 'bf.js';
+
+async function runQuad() {
+    // Assume bf.js is initialized
+
+    // Integrate f(x) = 4 / (1 + x^2) from 0 to 1. Expected: PI
+    const f = (x) => bf(4).div(bf(1).add(x.mul(x)));
+    const a = bf(0);
+    const b = bf(1);
+
+    const info = {};
+    const result = quad(f, a, b, info);
+
+    if (result) {
+        console.log('Quad integral:', result.toString());
+        console.log('Difference from PI:', result.sub(Constants.PI).abs().toString());
+        console.log(info.toString());
+    } else {
+        console.log('Quad integration failed.');
+        console.log(info.toString());
+    }
+}
+// runQuad();
+```
+
+### `romberg(f, a, b, info)`
 
 Computes the definite integral of a function `f(x)` from `a` to `b` using Romberg's method, which applies Richardson extrapolation to the trapezoidal rule for high precision.
 
 ```javascript
-import { bf, PI } from 'bf.js';
+import { bf, Constants } from 'bf.js';
 import { romberg } from 'bf.js';
 
 async function runRomberg() {
@@ -307,7 +341,7 @@ async function runRomberg() {
 
     if (result) {
         console.log('Romberg integral:', result.toString());
-        console.log('Difference from PI:', result.sub(PI).abs().toString());
+        console.log('Difference from PI:', result.sub(Constants.PI).abs().toString());
         console.log(info.toString());
     } else {
         console.log('Romberg integration failed.');

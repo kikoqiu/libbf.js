@@ -69,7 +69,7 @@ export function roots(_coeffs, info = {}) {
         // Calculate precision based on error
         let c=max_err.cmp(zero);
         if (c === 0) {
-            info.eff_decimal_precision = bfjs.decimal_precision();
+            info.eff_decimal_precision = bfjs.decimalPrecision();
         } else if (c < 0) {
             info.eff_decimal_precision = 0;
         } else {

@@ -1,5 +1,5 @@
-const { BigFraction } = require('../dist/bf.cjs'); // Adjust import path as needed
-
+const { BigFraction, BigFloat } = require('../dist/bf.cjs'); // Adjust import path as needed
+const { init } = require("./testhelper.js");
 describe('BigFraction Class Comprehensive Test Suite', () => {
 
     // ==========================================
@@ -258,6 +258,10 @@ describe('BigFraction Class Comprehensive Test Suite', () => {
 
 describe('BigFraction Constructor & Number Parsing Tests', () => {
 
+    beforeAll(async () => {
+        await init();
+    });
+
     // 1. Test Simple Dyadic Rational (0.5)
     // 0.5 is exactly representable in binary as 1 * 2^-1
     test('1. Should correctly parse simple float 0.5 to 1/2', () => {
@@ -345,5 +349,144 @@ describe('BigFraction Constructor & Number Parsing Tests', () => {
         // They should result in the same math value
         expect(s1.cmp(n1)).toBe(0);
         expect(s1.toString()).toBe('1/2');
+    });
+
+    test('11.00 Should construct BigFraction from BigFloat', () => {
+        let bf=new BigFloat("1e-100");
+        let s = new BigFraction(bf);
+        expect(s.toString()).toBe('1/10000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000');
+
+        bf=new BigFloat("1e-200");
+        s = new BigFraction(bf);
+        expect(s.toString()).toBe('0');
+
+    });
+
+    test('11.01 Should construct BigFraction from BigFloat', () => {
+        let bf=new BigFloat("100.5");
+        const s = new BigFraction(bf);
+        expect(s.toString()).toBe('201/2');
+    });
+    
+    test('11.01 Should construct BigFraction from BigFloat', () => {
+        let bf=new BigFloat("100.5");
+        const s = new BigFraction(bf);
+        expect(s.toString()).toBe('201/2');
+    });
+
+    test('11.02 Should construct BigFraction from Number', () => {        
+        const s = new BigFraction(100.5);
+        expect(s.toString()).toBe('201/2');
+
+        const s2 = new BigFraction(2/3);
+        expect(s2.toString()).toBe('2/3');
+    });
+
+    test('11.03 Should construct BigFraction from 0', () => {        
+        const s = new BigFraction(0);
+        expect(s.toString()).toBe('0');
+    });
+
+    test('11.04 Should construct BigFraction from -0', () => {        
+        // -0 in IEEE 754 should still correctly normalize to mathematical 0/1
+        const s = new BigFraction(-0);
+        expect(s.toString()).toBe('0');
+    });
+
+    test('11.05 Should construct BigFraction from positive integer', () => {        
+        const s = new BigFraction(42);
+        expect(s.toString()).toBe('42');
+    });
+
+    test('11.06 Should construct BigFraction from negative integer', () => {        
+        const s = new BigFraction(-100);
+        expect(s.toString()).toBe('-100');
+    });
+
+    test('11.07 Should construct BigFraction from Number.MAX_SAFE_INTEGER', () => {        
+        const s = new BigFraction(Number.MAX_SAFE_INTEGER);
+        expect(s.toString()).toBe('9007199254740991');
+    });
+
+    test('11.08 Should construct BigFraction from Number.MIN_SAFE_INTEGER', () => {        
+        const s = new BigFraction(Number.MIN_SAFE_INTEGER);
+        expect(s.toString()).toBe('-9007199254740991');
+    });
+
+    test('11.09 Should construct BigFraction from exact binary decimal (0.5)', () => {        
+        const s = new BigFraction(0.5);
+        expect(s.toString()).toBe('1/2');
+    });
+
+    test('11.10 Should construct BigFraction from exact negative decimal (-0.125)', () => {        
+        const s = new BigFraction(-0.125);
+        expect(s.toString()).toBe('-1/8');
+    });
+
+    test('11.11 Should construct BigFraction from base-10 non-exact float (0.1)', () => {        
+        // 0.1 has infinite precision in binary, must be resolved by continued fraction
+        const s = new BigFraction(0.1);
+        expect(s.toString()).toBe('1/10');
+    });
+
+    test('11.12 Should construct BigFraction from base-10 non-exact float (0.2)', () => {        
+        const s = new BigFraction(0.2);
+        expect(s.toString()).toBe('1/5');
+    });
+
+    test('11.13 Should construct BigFraction from base-10 non-exact float (0.3)', () => {        
+        const s = new BigFraction(0.3);
+        expect(s.toString()).toBe('3/10');
+    });
+
+    test('11.14 Should construct BigFraction from repeating fraction (1/3)', () => {        
+        const s = new BigFraction(1 / 3);
+        expect(s.toString()).toBe('1/3');
+    });
+
+    test('11.15 Should construct BigFraction from repeating fraction (1/7)', () => {        
+        const s = new BigFraction(1 / 7);
+        expect(s.toString()).toBe('1/7');
+    });
+
+    test('11.16 Should construct BigFraction from repeating fraction (1/9)', () => {        
+        const s = new BigFraction(1 / 9);
+        expect(s.toString()).toBe('1/9');
+    });
+
+    test('11.17 Should construct BigFraction from repeating fraction (5/6)', () => {        
+        const s = new BigFraction(5 / 6);
+        expect(s.toString()).toBe('5/6');
+    });
+
+    test('11.18 Should construct BigFraction from exact mixed number (1.25)', () => {        
+        const s = new BigFraction(1.25);
+        expect(s.toString()).toBe('5/4');
+    });
+
+    test('11.19 Should construct BigFraction from small exact decimal (0.03125)', () => {        
+        // 0.03125 is 1/32
+        const s = new BigFraction(0.03125);
+        expect(s.toString()).toBe('1/32');
+    });
+
+    test('03.20 Should construct BigFraction from small fractional float (1/1000)', () => {        
+        const s = new BigFraction(1 / 1000); // aka 0.001
+        expect(s.toString()).toBe('1/1000');
+    });
+
+    test('03.21 Should construct BigFraction from small fractional float (123561/2341)', () => {        
+        const s = new BigFraction(123561/2341);
+        expect(s.toString()).toBe('123561/2341');
+    });
+
+    test('03.22 Should construct BigFraction from small fractional float (12371/1233111)', () => {        
+        const s = new BigFraction(12371/1233111);
+        expect(s.toString()).toBe('12371/1233111');
+    });
+
+    test('03.23 Should construct BigFraction from small fractional float (-1233111*13/(12371*13))', () => {        
+        const s = new BigFraction(-1233111*13/(12371*13));
+        expect(s.toString()).toBe('-1233111/12371');
     });
 });

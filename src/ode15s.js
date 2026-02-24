@@ -1,0 +1,585 @@
+import { BigFloat, bf, zero, one, SparseMatrixCSC, decimalPrecision, getEpsilon } from "./bf.js";
+/**
+ * High-precision Stiff ODE Solver (Equivalent to MATLAB's ode15s).
+ * Variable-Order (1-5), Variable-Step Backward Differentiation Formulas (BDF).
+ * Utilizes custom SparseMatrixCSC for high-performance implicit Newton-Raphson iterations.
+ *
+ * @param {Function} odefun - The main function: dydt = odefun(t, y) or returns { M, f }.
+ * @param {Array<number|string|BigFloat>} tspan - Interval of integration [t0, tf].
+ * @param {Array<number|string|BigFloat>|BigFloat} y0 - Initial conditions.
+ * @param {Object}[info={}] - Configuration and Status object.
+ * 
+ *        // --- Input Configuration Properties ---
+ * @param {Function}[info.Jacobian] - Optional analytical Jacobian: J = Jac(t, y, f). Returns COO object {rowIdx, colIdx, vals} or 2D Array.
+ * @param {number|string|BigFloat}[info._e="1e-15"] - Absolute Tolerance.
+ * @param {number|string|BigFloat}[info._re=info._e] - Relative Tolerance.
+ * @param {boolean}[info.estimate_error] - when true, info.global_error will return the estimated global error.
+ * @param {number|string|BigFloat}[info.initial_step] - Initial step size guess.
+ * @param {number}[info.progress] - log progress every info.progress*100% progress
+ * @param {number}[info.progressCb] - progress call back progressCb(pos:Number,t,y)
+ * @param {number}[info.max_step=2000000] - Maximum number of steps allowed.
+ * @param {number}[info.max_time=1200000] - Maximum execution time in milliseconds.
+ * @param {Function}[info.cb] - Optional callback per accepted step: cb(t, y).
+ * 
+ * @returns {Object|null} { t, y, dy } or null on catastrophic failure.
+ */
+export function ode15s(odefun, tspan, y0, info = {}) {
+    // 1. Core Configuration & Data Formatting
+    const safe_bf = (n) => (n instanceof BigFloat) ? n : bf(n);
+    
+    let absTol = safe_bf(info._e ?? "1e-15");
+    let relTol = info._re===undefined ? absTol:safe_bf(info._re);
+    
+    let max_steps_limit = info.max_step || 2000000;
+    let max_time = info.max_time || 1200000;
+    const start_time = new Date().getTime();
+
+    let y_curr = Array.isArray(y0) ? y0.map(safe_bf) : [safe_bf(y0)];
+    let dim = y_curr.length;
+
+    let t_start = safe_bf(tspan[0]);
+    let t_final = safe_bf(tspan[1]);
+    let t = t_start;
+
+    if (t_start.cmp(t_final) === 0) return null;
+    let t_span = t_final.sub(t_start);
+    let direction = t_span.sign();
+
+    let test_progress=undefined;    
+    if(info.progress!==undefined){
+        let progress=info.progress;
+        if(progress<=0 || progress>=1){
+            progress=0.1;
+        }
+        let last_progress=0;
+        test_progress=(t,y)=>{
+            let pos=t.sub(t_start).div(t_span).f64();
+            if(pos-last_progress>=progress){                
+                last_progress=pos;
+                if(info.progressCb){
+                    info.progressCb(pos,t,y);
+                }else{
+                    console.log(`Progress at progress=${(pos*100).toFixed(1)}%, y=${(Array.isArray(y)?y:[y]).map(x=>x.f64()).join(",")}`);
+                }
+            }
+        }
+    }
+
+    // 2. Dynamic Thresholds based on System Precision
+    const prec = decimalPrecision();
+    
+    // Proximity tolerance to hit t_final identically
+    const machine_eps = getEpsilon();
+    const time_tolerance = t_final.abs().add(one).mul(machine_eps).mul(bf("1e4"));
+    
+    // Minimum allowable step size boundary before triggering underflow exception
+    const min_h_limit = bf("1e-" + Math.floor(prec * 0.9)); 
+    
+    // Optimal finite difference perturbation eps ≈ sqrt(machine_epsilon)
+    const jacobian_eps = bf("1e-" + Math.max(Math.floor(prec / 2), 8));
+    
+    // Safe standard representation limit to prevent Infinity during fractional powers
+    const tiny_lte = Math.pow(10, -Math.floor(prec * 0.6667));
+
+    // Zero-tolerance for algebraic Mass variables in DAE mapping
+    const m_zero_tol = bf("1e-" + Math.floor(prec * 0.8));
+
+    // 3. Pre-allocated Loop Constants (Memory / GC Optimization)
+    const bf_0_2 = bf("0.2");
+    const bf_0_5 = bf("0.5");
+    const bf_newton_tol = bf("0.05"); // Strict standard for Newton convergence ratio
+    const bf_k_arr =[zero, one, bf("2"), bf("3"), bf("4"), bf("5"), bf("6")];
+
+    let h = info.initial_step ? safe_bf(info.initial_step).abs() : t_final.sub(t_start).abs().mul(bf("0.01"));
+    if (h.cmp(bf("1e-12")) < 0) h = bf("1e-12");
+    h = h.mul(bf(direction));
+
+    // Classical BDF Coefficients (Order 1 to 5)
+    const BDF =[
+        null, // 0
+        { alpha: [bf("1")], beta: bf("1") }, // 1st Order (Backward Euler)
+        { alpha:[bf("4").div(bf("3")), bf("-1").div(bf("3"))], beta: bf("2").div(bf("3")) }, // 2nd
+        { alpha:[bf("18").div(bf("11")), bf("-9").div(bf("11")), bf("2").div(bf("11"))], beta: bf("6").div(bf("11")) }, // 3rd
+        { alpha:[bf("48").div(bf("25")), bf("-36").div(bf("25")), bf("16").div(bf("25")), bf("-3").div(bf("25"))], beta: bf("12").div(bf("25")) }, // 4th
+        { alpha:[bf("300").div(bf("137")), bf("-300").div(bf("137")), bf("200").div(bf("137")), bf("-75").div(bf("137")), bf("12").div(bf("137"))], beta: bf("60").div(bf("137")) } // 5th
+    ];
+
+    info.t = [t];
+    info.y =[y_curr.map(v => v)];
+    info.dy =[];
+    info.steps = 0;
+    info.failed_steps = 0;
+    info.status = "running";
+
+    let k = 1; // Start with Order 1 (Backward Euler)
+    
+    // Initial State Evaluation
+    let res0 = odefun(t, y_curr);
+    let M0 = Array.isArray(res0) ? null : res0.M;
+    let f0 = Array.isArray(res0) ? res0 : res0.f;
+    if (!Array.isArray(f0)) f0 = [f0];
+
+    // Accurately capture initial derivative, respecting algebraic Index-1 structures
+    let dy0 =[];
+    for (let d = 0; d < dim; d++) {
+        let m_val = M0 ? M0[d] : one;
+        if (m_val.abs().cmp(m_zero_tol) <= 0) {
+            dy0.push(zero); // Algebraic constraint variables do not propagate differential slopes
+        } else {
+            dy0.push(f0[d].div(m_val));
+        }
+    }
+    info.dy.push(dy0);
+
+    let history =[{ t: t, y: y_curr, f: f0, M: M0 }];
+
+    // --- Core Mathematical Helpers ---
+    
+    const computeDividedDifferences = (pts) => {
+        let m = pts.length - 1;
+        let D =[];
+        for (let i = 0; i <= m; i++) D.push([pts[i].y.map(v => v)]);
+        for (let j = 1; j <= m; j++) {
+            for (let i = 0; i <= m - j; i++) {
+                let dx = pts[i].t.sub(pts[i + j].t);
+                let inv_dx = one.div(dx); // Hoisted division for precision velocity
+                let diff =[];
+                for (let d = 0; d < dim; d++) {
+                    diff.push(D[i][j - 1][d].sub(D[i + 1][j - 1][d]).mul(inv_dx));
+                }
+                D[i].push(diff);
+            }
+        }
+        return D;
+    };
+
+    const evalPoly = (pts, D, t_target) => {
+        let m = pts.length - 1;
+        let res = new Array(dim).fill(zero);
+        let term = one;
+        for (let j = 0; j <= m; j++) {
+            for (let d = 0; d < dim; d++) res[d] = res[d].add(D[0][j][d].mul(term));
+            if (j < m) term = term.mul(t_target.sub(pts[j].t));
+        }
+        return res;
+    };
+
+    const getJacobian = (t_val, y_val, f_val) => {
+        if (info.Jacobian) {
+            let J_user = info.Jacobian(t_val, y_val, f_val);
+            // Handle legacy dense 2D array return from custom Jacobian
+            if (Array.isArray(J_user) && Array.isArray(J_user[0])) {
+                let rowIdx =[], colIdx = [], vals =[];
+                for (let i = 0; i < J_user.length; i++) {
+                    for (let j = 0; j < J_user[i].length; j++) {
+                        let v = J_user[i][j];
+                        if (!v.isZero()) {
+                            rowIdx.push(i); colIdx.push(j); vals.push(v);
+                        }
+                    }
+                }
+                return { rowIdx, colIdx, vals };
+            }
+            return J_user; // Assumes COO format object: {rowIdx, colIdx, vals}
+        }
+
+        let rowIdx = [];
+        let colIdx = [];
+        let vals =[];
+
+        for (let j = 0; j < dim; j++) {
+            let y_pert =[...y_val];
+            let delta = y_val[j].abs().mul(jacobian_eps);
+            
+            // Prevent zero-derivative blackout via fallback delta
+            if (delta.isZero()) delta = jacobian_eps; 
+            
+            let inv_delta = one.div(delta); 
+            y_pert[j] = y_pert[j].add(delta);
+            
+            let res_pert = odefun(t_val, y_pert);
+            let f_pert = Array.isArray(res_pert) ? res_pert : res_pert.f;
+            if (!Array.isArray(f_pert)) f_pert =[f_pert];
+            
+            for (let i = 0; i < dim; i++) {
+                let diff = f_pert[i].sub(f_val[i]).mul(inv_delta);
+                if (!diff.isZero()) {
+                    rowIdx.push(i);
+                    colIdx.push(j);
+                    vals.push(diff);
+                }
+            }
+        }
+        return { rowIdx, colIdx, vals };
+    };
+
+    let global_error;
+    if(!!info.estimate_error){
+        global_error = new Array(dim).fill(zero);
+        info.global_error_history =[global_error.map(v => v.f64())];
+    }
+
+    // --- Newton Matrix Caching States ---
+    let update_jacobian = true;
+    let update_LU = true;
+    let steps_since_jacobian = 0;
+    let last_h_beta = zero;
+    let J_M = null;
+    let J_f = null; // Stored natively as COO structural format
+    let lu_res = null;
+
+    // 4. Main Integration Loop
+    let done = false;
+    let steps = 0;
+
+    while (!done) {
+        if (steps >= max_steps_limit) { info.status = "max_steps"; break; }
+        if (new Date().getTime() - start_time > max_time) { info.status = "timeout"; break; }
+
+        let dist_to_end = t_final.sub(t);
+        let dist_abs = dist_to_end.abs();
+
+        if (dist_abs.cmp(time_tolerance) <= 0) { done = true; break; }
+
+        let last_step = false;
+        if (h.abs().cmp(dist_abs) >= 0) {
+            h = dist_to_end; // Preserve sign to accurately step to limits
+            last_step = true;
+            update_LU = true; // H changing guarantees an LU invalidation
+        }
+
+        let t_next = t.add(h);
+
+        // a. Predictor (Maps history to uniform extrapolation)
+        let pts = history.slice(0, k + 1);
+        let y_pred, y_star =[];
+        let D_old;
+        
+        if (pts.length === 1) {
+            // First Bootstrap Step (Direct Extrapolation using DAE context)
+            y_pred =[];
+            let M_start = pts[0].M;
+            let f_start = pts[0].f;
+            for (let d = 0; d < dim; d++) {
+                let m_val = M_start ? M_start[d] : one;
+                if (m_val.abs().cmp(m_zero_tol) <= 0) {
+                    y_pred.push(pts[0].y[d]);
+                } else {
+                    y_pred.push(pts[0].y[d].add(h.mul(f_start[d].div(m_val))));
+                }
+            }
+            y_star = [pts[0].y];
+        } else {
+            D_old = computeDividedDifferences(pts);
+            y_pred = evalPoly(pts, D_old, t_next);
+            for (let j = 1; j <= k; j++) {
+                y_star.push(evalPoly(pts, D_old, t_next.sub(h.mul(bf_k_arr[j]))));
+            }
+        }
+
+        // Constant vector C for the BDF framework
+        let C = new Array(dim).fill(zero);
+        for (let j = 1; j <= k; j++) {
+            let alpha_j = BDF[k].alpha[j - 1];
+            for (let d = 0; d < dim; d++) C[d] = C[d].add(alpha_j.mul(y_star[j - 1][d]));
+        }
+
+        let beta_k = BDF[k].beta;
+        let h_beta = h.mul(beta_k);
+
+        // b. Factorization Reuse Logistics (Massive Performance Multiplier)
+        if (steps_since_jacobian >= 400) update_jacobian = true;
+
+        if (update_jacobian) {
+            let res_pred = odefun(t_next, y_pred);
+            let f_pred = Array.isArray(res_pred) ? res_pred : res_pred.f;
+            if (!Array.isArray(f_pred)) f_pred = [f_pred];
+
+            J_M = Array.isArray(res_pred) ? null : res_pred.M;
+            J_f = getJacobian(t_next, y_pred, f_pred);
+
+            steps_since_jacobian = 0;
+            update_LU = true;
+            update_jacobian = false;
+        }
+
+        if (!update_LU) {
+            let h_beta_ratio = h_beta.div(last_h_beta);
+            let h_beta_ratio_n = Math.abs(h_beta_ratio.f64());
+            // Invalidate LU if scaled parameters drifted by >25%
+            if (h_beta_ratio_n>1.25|| h_beta_ratio_n<0.8) {
+                update_LU = true;
+            }
+        }
+
+        if (update_LU) {
+            // Re-assemble Iteration Matrix JG = M - h * beta_k * J_f completely sparsely
+            let rowIdx = [];
+            let colIdx = [];
+            let vals =[];
+
+            // Add Mass matrix elements (M_i on diagonal)
+            for (let i = 0; i < dim; i++) {
+                let m_val = J_M ? J_M[i] : one;
+                if (!m_val.isZero()) {
+                    rowIdx.push(i);
+                    colIdx.push(i);
+                    vals.push(m_val);
+                }
+            }
+
+            // Subtract h_beta * J_f (Duplicates will be summed safely by fromCOO)
+            for (let i = 0; i < J_f.vals.length; i++) {
+                let r = J_f.rowIdx[i];
+                let c = J_f.colIdx[i];
+                let v = J_f.vals[i];
+                let J_term = h_beta.mul(v).neg();
+                rowIdx.push(r);
+                colIdx.push(c);
+                vals.push(J_term);
+            }
+
+            try {
+                let JG_sparse = SparseMatrixCSC.fromCOO(dim, dim, rowIdx, colIdx, vals);
+                lu_res = JG_sparse.lu(); // Compute New Direct Inverse System
+                last_h_beta = h_beta;
+                update_LU = false;
+            } catch (e) {
+                // Catches Structural Singularities natively thrown by Matrix class
+                h = h.mul(bf_0_2);
+                info.failed_steps++;
+                last_step = false;
+                update_jacobian = true; 
+                continue;
+            }
+        }
+
+        // c. Implicit Newton-Raphson Operations
+        let y_tmp_curr = y_pred.map(v => v);
+        let newton_converged = false;
+        let M_curr = null;
+        let old_delta_norm = null;
+
+        for (let iter = 0; iter < 5; iter++) {
+            let res_curr = odefun(t_next, y_tmp_curr);
+            M_curr = Array.isArray(res_curr) ? null : res_curr.M;
+            let f_curr = Array.isArray(res_curr) ? res_curr : res_curr.f;
+            if (!Array.isArray(f_curr)) f_curr = [f_curr];
+
+            let negG =[];
+            for (let d = 0; d < dim; d++) {
+                let y_diff = y_tmp_curr[d].sub(C[d]);
+                let m_term = M_curr ? M_curr[d].mul(y_diff) : y_diff;
+                let G_val = m_term.sub(h_beta.mul(f_curr[d]));
+                negG.push(G_val.neg());
+            }
+
+            // High-Speed Sparse Back-Substitution
+            let y_tmp = lu_res.L.solveLowerTriangular(negG);
+            let delta_y = lu_res.U.solveUpperTriangular(y_tmp).values;
+
+            let step_converged = true;
+            let current_delta_norm = zero;
+            
+            for (let d = 0; d < dim; d++) {
+                y_tmp_curr[d] = y_tmp_curr[d].add(delta_y[d]);
+                
+                let max_y = y_curr[d].abs().cmp(y_tmp_curr[d].abs()) > 0 ? y_curr[d].abs() : y_tmp_curr[d].abs();
+                let sc = absTol.add(relTol.mul(max_y));
+                
+                // Track dynamic max correction vector ratio
+                let ratio = delta_y[d].abs().div(sc);
+                if (ratio.cmp(current_delta_norm) > 0) current_delta_norm = ratio;
+
+                if (delta_y[d].abs().cmp(sc.mul(bf_newton_tol)) > 0) {
+                    step_converged = false;
+                }
+            }
+
+            if (step_converged) {
+                newton_converged = true;
+                break;
+            }
+
+            // Convergence rate monitoring: predictive early exit
+            if (iter > 0 && old_delta_norm !== null) {
+                let theta = current_delta_norm.div(old_delta_norm).f64();
+                if (theta > 0.8) {
+                    break; // Convergence is too slow; fallback immediately to avoid hanging
+                }
+            }
+            old_delta_norm = current_delta_norm;
+        }
+
+        if (!newton_converged) {
+            // Newton failed. If we used a cached Jacobian, try updating it first before punishing the step size.
+            if (steps_since_jacobian > 0) {
+                update_jacobian = true;
+                continue; // Retry precisely identical `h` parameter
+            }
+            
+            h = h.mul(bf_0_5);
+            info.failed_steps++;
+            last_step = false;
+            update_jacobian = true;
+            continue;
+        }
+
+        // d. Local Truncation Error (LTE) Assessment
+        let LTE_norm = 0;
+        let inv_k_plus_1 = one.div(bf_k_arr[k + 1]);
+
+        for (let d = 0; d < dim; d++) {
+            let m_val = M_curr ? M_curr[d] : one;
+            // Skip tracking integration error strictly on Index-1 Algebraic variables
+            if (m_val.abs().cmp(m_zero_tol) <= 0) continue; 
+
+            let err_val = y_tmp_curr[d].sub(y_pred[d]).mul(inv_k_plus_1);
+            
+            let max_y = y_curr[d].abs().cmp(y_tmp_curr[d].abs()) > 0 ? y_curr[d].abs() : y_tmp_curr[d].abs();
+            let sc = absTol.add(relTol.mul(max_y));
+            
+            // Performed only once per successful Newton resolve
+            let ratio = err_val.abs().div(sc).f64();
+            if (ratio > LTE_norm) LTE_norm = ratio;
+        }
+
+        if (LTE_norm <= 1.0) {
+            if(!!info.estimate_error){
+                //error estimate
+                let rhs_E =[];
+                for (let d = 0; d < dim; d++) {
+                    let m_val = M_curr ? M_curr[d] : one;
+                    if (m_val.abs().cmp(m_zero_tol) <= 0) {
+                        rhs_E.push(global_error[d]); // Algebraic error is bound to 0
+                    } else {
+                        let err_val_true = y_tmp_curr[d].sub(y_pred[d]).mul(inv_k_plus_1);
+                        rhs_E.push(global_error[d].add(err_val_true));
+                    }
+                }
+
+                try {
+                    let E_tmp = lu_res.L.solveLowerTriangular(rhs_E);
+                    global_error = lu_res.U.solveUpperTriangular(E_tmp).values;
+                } catch (e) {
+                    for (let d = 0; d < dim; d++) global_error[d] = rhs_E[d];
+                }
+                info.global_error_history.push(global_error.map(v => v.f64()));
+            }
+
+            // STEP ACCEPTED
+            steps_since_jacobian++;
+            t = t_next;
+            y_curr = y_tmp_curr;
+            
+            let res_final = odefun(t, y_curr);
+            let f_final = Array.isArray(res_final) ? res_final : res_final.f;
+            let M_final = Array.isArray(res_final) ? null : res_final.M;
+            if (!Array.isArray(f_final)) f_final =[f_final];
+            
+            history.unshift({ t: t, y: y_curr, f: f_final, M: M_final });
+            if (history.length > 7) history.pop(); 
+
+            // Extract Exact BDF Derivative properly solving DAE outputs for Hermite Interpolators
+            let dy_curr = new Array(dim);
+            for (let d = 0; d < dim; d++) dy_curr[d] = y_curr[d].sub(C[d]).div(h_beta);
+
+            info.t.push(t);
+            info.y.push(y_curr.map(v => v));
+            info.dy.push(dy_curr);
+            if (info.cb) info.cb(t, y_curr);
+            if(test_progress!==undefined) test_progress(t,y_curr);
+            steps++;
+
+            if (last_step) { done = true; break; }
+
+            // e. Adaptive VSVO Logic (Variable Step, Variable Order Strategy)
+            let D_new = computeDividedDifferences(history);
+            let L_hist = history.length;
+            
+            let max_h_opt = 0;
+            let next_k = k;
+
+            // Gauge hypothetic steps across order variants
+            for (let m = Math.max(1, k - 1); m <= Math.min(5, k + 1); m++) {
+                let err_norm_m = 0;
+
+                if (m === k) {
+                    err_norm_m = LTE_norm; 
+                } else if (m + 1 < L_hist) {
+                    let term = one;
+                    for (let i = 1; i <= m + 1; i++) term = term.mul(history[0].t.sub(history[i].t));
+                    
+                    let inv_m_plus_1 = one.div(bf_k_arr[m + 1]);
+                    
+                    for (let d = 0; d < dim; d++) {
+                        let m_val = M_final ? M_final[d] : one;
+                        if (m_val.abs().cmp(m_zero_tol) <= 0) continue; 
+
+                        let err_val = D_new[0][m + 1][d].mul(term).mul(inv_m_plus_1);
+                        let sc = absTol.add(relTol.mul(y_curr[d].abs()));
+                        let ratio = err_val.abs().div(sc).f64();
+                        if (ratio > err_norm_m) err_norm_m = ratio;
+                    }
+                } else {
+                    continue; // Gather more runtime before judging greater complexity scales
+                }
+
+                if (err_norm_m < tiny_lte) err_norm_m = tiny_lte; 
+                let h_opt_m = 0.9 * Math.pow(err_norm_m, -1.0 / (m + 1));
+                
+                // Weight penalty offsets mitigating unnecessary order escalations 
+                if (m === k - 1) h_opt_m *= 1.2; 
+                if (m === k + 1) h_opt_m *= 0.8;
+
+                if (h_opt_m > max_h_opt) {
+                    max_h_opt = h_opt_m;
+                    next_k = m;
+                }
+            }
+
+            let factor = Math.max(0.2, Math.min(5.0, max_h_opt));
+            
+            // Limit trivial step size changes to maximize LU factorization reuses
+            if (factor >= 1.5 || factor <= 0.8 || next_k !== k) {
+                h = h.mul(bf(factor));
+                k = next_k;
+            }
+
+        } else {
+            // STEP REJECTED
+            info.failed_steps++;
+            last_step = false;
+            update_jacobian = true; // Inaccuracies here infer system nonlinearities moved aggressively
+            
+            if (LTE_norm < tiny_lte) LTE_norm = tiny_lte; 
+            
+            let factor = 0.9 * Math.pow(LTE_norm, -1.0 / (k + 1));
+            factor = Math.max(0.1, factor); 
+            h = h.mul(bf(factor));
+
+            // Absolute underflow safety triggers stopping infinitely shrinking vectors
+            if (h.abs().cmp(min_h_limit) < 0) {
+                console.warn(`ode15s: Step size underflow limit reached. Function represents aggressive structural singularities or impossibly strict relative limits.`);
+                info.status = "underflow";
+                break;
+            }
+        }
+    }
+
+    info.exectime = new Date().getTime() - start_time;
+    info.steps = steps;
+    info.toString = function() {
+        return `status=${this.status}, steps=${this.steps}, failed=${this.failed_steps}, final_order=${k}, t_final=${this.t[this.t.length-1].toString(10, 6)}`;
+    };
+    if(!!info.estimate_error){
+        info.global_error = global_error;
+    }
+
+    if (info.status === "running") {
+        info.status = "done";
+        return { t: info.t, y: info.y, dy: info.dy };
+    }
+
+    return null;    
+}

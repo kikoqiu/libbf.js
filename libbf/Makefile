@@ -43,10 +43,10 @@ endif
 
 CC=$(CROSS_PREFIX)emcc
 CFLAGS=-Wall -g $(PROFILE) -MMD
-CFLAGS+=-O3
+CFLAGS+=-O3 -msimd128
 CFLAGS+=-flto
 #CFLAGS+=-Os
-LDFLAGS=-s ALLOW_MEMORY_GROWTH=1 -s EXPORTED_RUNTIME_METHODS=cwrap,ccall,allocateUTF8,AsciiToString,HEAPU8,HEAPU32 -s EXPORTED_FUNCTIONS=_free,_malloc -s NO_EXIT_RUNTIME=1 -s EXPORT_NAME="createLibbf" -s WASM=1 -s MODULARIZE=1  -gsource-map --source-map-base ./
+LDFLAGS=-msimd128 -s MALLOC=mimalloc -flto=full -s ALLOW_MEMORY_GROWTH=1 -s EXPORTED_RUNTIME_METHODS=cwrap,ccall,allocateUTF8,AsciiToString,HEAPU8,HEAPU32 -s EXPORTED_FUNCTIONS=_free,_malloc -s NO_EXIT_RUNTIME=1 -s EXPORT_NAME="createLibbf" -s WASM=1 -s MODULARIZE=1  -gsource-map --source-map-base ./
 ifdef CONFIG_PROFILE
 CFLAGS+=-p
 LDFLAGS+=-p

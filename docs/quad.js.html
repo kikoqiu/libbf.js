@@ -1,0 +1,439 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    
+    <meta charset="utf-8">
+    <title>quad.js - Documentation</title>
+    
+    
+    <script src="scripts/prettify/prettify.js"></script>
+    <script src="scripts/prettify/lang-css.js"></script>
+    <!--[if lt IE 9]>
+      <script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
+    <![endif]-->
+    <link type="text/css" rel="stylesheet" href="styles/prettify.css">
+    <link type="text/css" rel="stylesheet" href="styles/jsdoc.css">
+    <script src="scripts/nav.js" defer></script>
+    
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+</head>
+<body>
+
+<input type="checkbox" id="nav-trigger" class="nav-trigger" />
+<label for="nav-trigger" class="navicon-button x">
+  <div class="navicon"></div>
+</label>
+
+<label for="nav-trigger" class="overlay"></label>
+
+<nav >
+    
+    
+    <h2><a href="index.html">Home</a></h2><h3>Classes</h3><ul><li><a href="BigFloat.html">BigFloat</a><ul class='methods'><li data-type='method'><a href="BigFloat.html#abs">abs</a></li><li data-type='method'><a href="BigFloat.html#acos">acos</a></li><li data-type='method'><a href="BigFloat.html#add">add</a></li><li data-type='method'><a href="BigFloat.html#and">and</a></li><li data-type='method'><a href="BigFloat.html#asin">asin</a></li><li data-type='method'><a href="BigFloat.html#atan">atan</a></li><li data-type='method'><a href="BigFloat.html#atan2">atan2</a></li><li data-type='method'><a href="BigFloat.html#calc">calc</a></li><li data-type='method'><a href="BigFloat.html#calc2">calc2</a></li><li data-type='method'><a href="BigFloat.html#callFunc">callFunc</a></li><li data-type='method'><a href="BigFloat.html#ceil">ceil</a></li><li data-type='method'><a href="BigFloat.html#checkoprand">checkoprand</a></li><li data-type='method'><a href="BigFloat.html#checkstatus">checkstatus</a></li><li data-type='method'><a href="BigFloat.html#clone">clone</a></li><li data-type='method'><a href="BigFloat.html#cmp">cmp</a></li><li data-type='method'><a href="BigFloat.html#copy">copy</a></li><li data-type='method'><a href="BigFloat.html#cos">cos</a></li><li data-type='method'><a href="BigFloat.html#cosh">cosh</a></li><li data-type='method'><a href="BigFloat.html#dispose">dispose</a></li><li data-type='method'><a href="BigFloat.html#div">div</a></li><li data-type='method'><a href="BigFloat.html#equals">equals</a></li><li data-type='method'><a href="BigFloat.html#exp">exp</a></li><li data-type='method'><a href="BigFloat.html#f64">f64</a></li><li data-type='method'><a href="BigFloat.html#floor">floor</a></li><li data-type='method'><a href="BigFloat.html#fpround">fpround</a></li><li data-type='method'><a href="BigFloat.html#fromNumber">fromNumber</a></li><li data-type='method'><a href="BigFloat.html#geth">geth</a></li><li data-type='method'><a href="BigFloat.html#isAlmostZero">isAlmostZero</a></li><li data-type='method'><a href="BigFloat.html#isExactZero">isExactZero</a></li><li data-type='method'><a href="BigFloat.html#isFinit">isFinit</a></li><li data-type='method'><a href="BigFloat.html#isInExact">isInExact</a></li><li data-type='method'><a href="BigFloat.html#isNaN">isNaN</a></li><li data-type='method'><a href="BigFloat.html#isZero">isZero</a></li><li data-type='method'><a href="BigFloat.html#log">log</a></li><li data-type='method'><a href="BigFloat.html#mod">mod</a></li><li data-type='method'><a href="BigFloat.html#mul">mul</a></li><li data-type='method'><a href="BigFloat.html#neg">neg</a></li><li data-type='method'><a href="BigFloat.html#operatorEqual">operatorEqual</a></li><li data-type='method'><a href="BigFloat.html#operatorGreater">operatorGreater</a></li><li data-type='method'><a href="BigFloat.html#operatorGreaterEqual">operatorGreaterEqual</a></li><li data-type='method'><a href="BigFloat.html#operatorLess">operatorLess</a></li><li data-type='method'><a href="BigFloat.html#operatorLessEqual">operatorLessEqual</a></li><li data-type='method'><a href="BigFloat.html#operatorNotEqual">operatorNotEqual</a></li><li data-type='method'><a href="BigFloat.html#or">or</a></li><li data-type='method'><a href="BigFloat.html#pow">pow</a></li><li data-type='method'><a href="BigFloat.html#rem">rem</a></li><li data-type='method'><a href="BigFloat.html#round">round</a></li><li data-type='method'><a href="BigFloat.html#setEPSILON">setEPSILON</a></li><li data-type='method'><a href="BigFloat.html#setLOG2">setLOG2</a></li><li data-type='method'><a href="BigFloat.html#setMAX_VALUE">setMAX_VALUE</a></li><li data-type='method'><a href="BigFloat.html#setMIN_VALUE">setMIN_VALUE</a></li><li data-type='method'><a href="BigFloat.html#setPI">setPI</a></li><li data-type='method'><a href="BigFloat.html#setabs">setabs</a></li><li data-type='method'><a href="BigFloat.html#setacos">setacos</a></li><li data-type='method'><a href="BigFloat.html#setadd">setadd</a></li><li data-type='method'><a href="BigFloat.html#setand">setand</a></li><li data-type='method'><a href="BigFloat.html#setasin">setasin</a></li><li data-type='method'><a href="BigFloat.html#setatan">setatan</a></li><li data-type='method'><a href="BigFloat.html#setatan2">setatan2</a></li><li data-type='method'><a href="BigFloat.html#setceil">setceil</a></li><li data-type='method'><a href="BigFloat.html#setcos">setcos</a></li><li data-type='method'><a href="BigFloat.html#setdiv">setdiv</a></li><li data-type='method'><a href="BigFloat.html#setexp">setexp</a></li><li data-type='method'><a href="BigFloat.html#setfloor">setfloor</a></li><li data-type='method'><a href="BigFloat.html#setfpround">setfpround</a></li><li data-type='method'><a href="BigFloat.html#setlog">setlog</a></li><li data-type='method'><a href="BigFloat.html#setmod">setmod</a></li><li data-type='method'><a href="BigFloat.html#setmul">setmul</a></li><li data-type='method'><a href="BigFloat.html#setneg">setneg</a></li><li data-type='method'><a href="BigFloat.html#setor">setor</a></li><li data-type='method'><a href="BigFloat.html#setpow">setpow</a></li><li data-type='method'><a href="BigFloat.html#setrem">setrem</a></li><li data-type='method'><a href="BigFloat.html#setround">setround</a></li><li data-type='method'><a href="BigFloat.html#setsign">setsign</a></li><li data-type='method'><a href="BigFloat.html#setsin">setsin</a></li><li data-type='method'><a href="BigFloat.html#setsqrt">setsqrt</a></li><li data-type='method'><a href="BigFloat.html#setsub">setsub</a></li><li data-type='method'><a href="BigFloat.html#settan">settan</a></li><li data-type='method'><a href="BigFloat.html#settrunc">settrunc</a></li><li data-type='method'><a href="BigFloat.html#setxor">setxor</a></li><li data-type='method'><a href="BigFloat.html#sign">sign</a></li><li data-type='method'><a href="BigFloat.html#sin">sin</a></li><li data-type='method'><a href="BigFloat.html#sinh">sinh</a></li><li data-type='method'><a href="BigFloat.html#sqrt">sqrt</a></li><li data-type='method'><a href="BigFloat.html#sub">sub</a></li><li data-type='method'><a href="BigFloat.html#tan">tan</a></li><li data-type='method'><a href="BigFloat.html#tanh">tanh</a></li><li data-type='method'><a href="BigFloat.html#toBigInt">toBigInt</a></li><li data-type='method'><a href="BigFloat.html#toComplex">toComplex</a></li><li data-type='method'><a href="BigFloat.html#toFixed">toFixed</a></li><li data-type='method'><a href="BigFloat.html#toNumber">toNumber</a></li><li data-type='method'><a href="BigFloat.html#toString">toString</a></li><li data-type='method'><a href="BigFloat.html#toUint8Array">toUint8Array</a></li><li data-type='method'><a href="BigFloat.html#trunc">trunc</a></li><li data-type='method'><a href="BigFloat.html#visit">visit</a></li><li data-type='method'><a href="BigFloat.html#wraptypeh">wraptypeh</a></li><li data-type='method'><a href="BigFloat.html#xor">xor</a></li><li data-type='method'><a href="BigFloat.html#.fromString">fromString</a></li></ul></li><li><a href="BigFloat_BigFloat.html">BigFloat</a></li><li><a href="BigFraction.html">BigFraction</a><ul class='methods'><li data-type='method'><a href="BigFraction.html#abs">abs</a></li><li data-type='method'><a href="BigFraction.html#acos">acos</a></li><li data-type='method'><a href="BigFraction.html#acosh">acosh</a></li><li data-type='method'><a href="BigFraction.html#add">add</a></li><li data-type='method'><a href="BigFraction.html#asin">asin</a></li><li data-type='method'><a href="BigFraction.html#asinh">asinh</a></li><li data-type='method'><a href="BigFraction.html#atan">atan</a></li><li data-type='method'><a href="BigFraction.html#atanh">atanh</a></li><li data-type='method'><a href="BigFraction.html#cmp">cmp</a></li><li data-type='method'><a href="BigFraction.html#cos">cos</a></li><li data-type='method'><a href="BigFraction.html#cosh">cosh</a></li><li data-type='method'><a href="BigFraction.html#div">div</a></li><li data-type='method'><a href="BigFraction.html#equals">equals</a></li><li data-type='method'><a href="BigFraction.html#exp">exp</a></li><li data-type='method'><a href="BigFraction.html#floor">floor</a></li><li data-type='method'><a href="BigFraction.html#isAlmostZero">isAlmostZero</a></li><li data-type='method'><a href="BigFraction.html#isNaN">isNaN</a></li><li data-type='method'><a href="BigFraction.html#isZero">isZero</a></li><li data-type='method'><a href="BigFraction.html#log">log</a></li><li data-type='method'><a href="BigFraction.html#mul">mul</a></li><li data-type='method'><a href="BigFraction.html#neg">neg</a></li><li data-type='method'><a href="BigFraction.html#operatorAdd">operatorAdd</a></li><li data-type='method'><a href="BigFraction.html#operatorDiv">operatorDiv</a></li><li data-type='method'><a href="BigFraction.html#operatorEqual">operatorEqual</a></li><li data-type='method'><a href="BigFraction.html#operatorGreater">operatorGreater</a></li><li data-type='method'><a href="BigFraction.html#operatorGreaterEqual">operatorGreaterEqual</a></li><li data-type='method'><a href="BigFraction.html#operatorLess">operatorLess</a></li><li data-type='method'><a href="BigFraction.html#operatorLessEqual">operatorLessEqual</a></li><li data-type='method'><a href="BigFraction.html#operatorMul">operatorMul</a></li><li data-type='method'><a href="BigFraction.html#operatorNeg">operatorNeg</a></li><li data-type='method'><a href="BigFraction.html#operatorNotEqual">operatorNotEqual</a></li><li data-type='method'><a href="BigFraction.html#operatorPow">operatorPow</a></li><li data-type='method'><a href="BigFraction.html#operatorSub">operatorSub</a></li><li data-type='method'><a href="BigFraction.html#pow">pow</a></li><li data-type='method'><a href="BigFraction.html#sin">sin</a></li><li data-type='method'><a href="BigFraction.html#sinh">sinh</a></li><li data-type='method'><a href="BigFraction.html#sqrt">sqrt</a></li><li data-type='method'><a href="BigFraction.html#sub">sub</a></li><li data-type='method'><a href="BigFraction.html#tan">tan</a></li><li data-type='method'><a href="BigFraction.html#tanh">tanh</a></li><li data-type='method'><a href="BigFraction.html#toBigFloat">toBigFloat</a></li><li data-type='method'><a href="BigFraction.html#toNumber">toNumber</a></li><li data-type='method'><a href="BigFraction.html#toString">toString</a></li><li data-type='method'><a href="BigFraction.html#.fromString">fromString</a></li></ul></li><li><a href="BigFraction_BigFraction.html">BigFraction</a></li><li><a href="Complex.html">Complex</a><ul class='methods'><li data-type='method'><a href="Complex.html#abs">abs</a></li><li data-type='method'><a href="Complex.html#acos">acos</a></li><li data-type='method'><a href="Complex.html#acosh">acosh</a></li><li data-type='method'><a href="Complex.html#add">add</a></li><li data-type='method'><a href="Complex.html#arg">arg</a></li><li data-type='method'><a href="Complex.html#asin">asin</a></li><li data-type='method'><a href="Complex.html#asinh">asinh</a></li><li data-type='method'><a href="Complex.html#atan">atan</a></li><li data-type='method'><a href="Complex.html#atanh">atanh</a></li><li data-type='method'><a href="Complex.html#conj">conj</a></li><li data-type='method'><a href="Complex.html#cos">cos</a></li><li data-type='method'><a href="Complex.html#cosh">cosh</a></li><li data-type='method'><a href="Complex.html#div">div</a></li><li data-type='method'><a href="Complex.html#equals">equals</a></li><li data-type='method'><a href="Complex.html#exp">exp</a></li><li data-type='method'><a href="Complex.html#isAlmostZero">isAlmostZero</a></li><li data-type='method'><a href="Complex.html#isZero">isZero</a></li><li data-type='method'><a href="Complex.html#log">log</a></li><li data-type='method'><a href="Complex.html#mul">mul</a></li><li data-type='method'><a href="Complex.html#neg">neg</a></li><li data-type='method'><a href="Complex.html#pow">pow</a></li><li data-type='method'><a href="Complex.html#sin">sin</a></li><li data-type='method'><a href="Complex.html#sinh">sinh</a></li><li data-type='method'><a href="Complex.html#sqrt">sqrt</a></li><li data-type='method'><a href="Complex.html#sub">sub</a></li><li data-type='method'><a href="Complex.html#tan">tan</a></li><li data-type='method'><a href="Complex.html#tanh">tanh</a></li><li data-type='method'><a href="Complex.html#toString">toString</a></li><li data-type='method'><a href="Complex.html#.fromPolar">fromPolar</a></li><li data-type='method'><a href="Complex.html#.fromString">fromString</a></li></ul></li><li><a href="Poly.html">Poly</a><ul class='methods'><li data-type='method'><a href="Poly.html#acos">acos</a></li><li data-type='method'><a href="Poly.html#add">add</a></li><li data-type='method'><a href="Poly.html#asin">asin</a></li><li data-type='method'><a href="Poly.html#atan">atan</a></li><li data-type='method'><a href="Poly.html#cos">cos</a></li><li data-type='method'><a href="Poly.html#degree">degree</a></li><li data-type='method'><a href="Poly.html#deriv">deriv</a></li><li data-type='method'><a href="Poly.html#div">div</a></li><li data-type='method'><a href="Poly.html#equals">equals</a></li><li data-type='method'><a href="Poly.html#eval">eval</a></li><li data-type='method'><a href="Poly.html#exp">exp</a></li><li data-type='method'><a href="Poly.html#integ">integ</a></li><li data-type='method'><a href="Poly.html#log">log</a></li><li data-type='method'><a href="Poly.html#mul">mul</a></li><li data-type='method'><a href="Poly.html#neg">neg</a></li><li data-type='method'><a href="Poly.html#operatorAdd">operatorAdd</a></li><li data-type='method'><a href="Poly.html#operatorDiv">operatorDiv</a></li><li data-type='method'><a href="Poly.html#operatorMul">operatorMul</a></li><li data-type='method'><a href="Poly.html#operatorNeg">operatorNeg</a></li><li data-type='method'><a href="Poly.html#operatorPow">operatorPow</a></li><li data-type='method'><a href="Poly.html#operatorSub">operatorSub</a></li><li data-type='method'><a href="Poly.html#pow">pow</a></li><li data-type='method'><a href="Poly.html#powSeries">powSeries</a></li><li data-type='method'><a href="Poly.html#sin">sin</a></li><li data-type='method'><a href="Poly.html#sub">sub</a></li><li data-type='method'><a href="Poly.html#tan">tan</a></li><li data-type='method'><a href="Poly.html#toString">toString</a></li><li data-type='method'><a href="Poly.html#valuation">valuation</a></li><li data-type='method'><a href="Poly.html#.O">O</a></li><li data-type='method'><a href="Poly.html#.X">X</a></li></ul></li><li><a href="Scalar.html">Scalar</a><ul class='methods'><li data-type='method'><a href="Scalar.html#abs">abs</a></li><li data-type='method'><a href="Scalar.html#acos">acos</a></li><li data-type='method'><a href="Scalar.html#acosh">acosh</a></li><li data-type='method'><a href="Scalar.html#add">add</a></li><li data-type='method'><a href="Scalar.html#asin">asin</a></li><li data-type='method'><a href="Scalar.html#asinh">asinh</a></li><li data-type='method'><a href="Scalar.html#atan">atan</a></li><li data-type='method'><a href="Scalar.html#atanh">atanh</a></li><li data-type='method'><a href="Scalar.html#cmp">cmp</a></li><li data-type='method'><a href="Scalar.html#cos">cos</a></li><li data-type='method'><a href="Scalar.html#cosh">cosh</a></li><li data-type='method'><a href="Scalar.html#div">div</a></li><li data-type='method'><a href="Scalar.html#equals">equals</a></li><li data-type='method'><a href="Scalar.html#exp">exp</a></li><li data-type='method'><a href="Scalar.html#isAlmostZero">isAlmostZero</a></li><li data-type='method'><a href="Scalar.html#isZero">isZero</a></li><li data-type='method'><a href="Scalar.html#log">log</a></li><li data-type='method'><a href="Scalar.html#mul">mul</a></li><li data-type='method'><a href="Scalar.html#neg">neg</a></li><li data-type='method'><a href="Scalar.html#operatorAdd">operatorAdd</a></li><li data-type='method'><a href="Scalar.html#operatorDiv">operatorDiv</a></li><li data-type='method'><a href="Scalar.html#operatorMul">operatorMul</a></li><li data-type='method'><a href="Scalar.html#operatorNeg">operatorNeg</a></li><li data-type='method'><a href="Scalar.html#operatorPow">operatorPow</a></li><li data-type='method'><a href="Scalar.html#operatorSub">operatorSub</a></li><li data-type='method'><a href="Scalar.html#pow">pow</a></li><li data-type='method'><a href="Scalar.html#sin">sin</a></li><li data-type='method'><a href="Scalar.html#sinh">sinh</a></li><li data-type='method'><a href="Scalar.html#sqrt">sqrt</a></li><li data-type='method'><a href="Scalar.html#sub">sub</a></li><li data-type='method'><a href="Scalar.html#tan">tan</a></li><li data-type='method'><a href="Scalar.html#tanh">tanh</a></li><li data-type='method'><a href="Scalar.html#toString">toString</a></li><li data-type='method'><a href="Scalar.html#.fromString">fromString</a></li><li data-type='method'><a href="Scalar.html#.getLevel">getLevel</a></li><li data-type='method'><a href="Scalar.html#.promote">promote</a></li></ul></li><li><a href="SparseMatrixCSC.html">SparseMatrixCSC</a><ul class='methods'><li data-type='method'><a href="SparseMatrixCSC.html#add">add</a></li><li data-type='method'><a href="SparseMatrixCSC.html#cholesky">cholesky</a></li><li data-type='method'><a href="SparseMatrixCSC.html#clone">clone</a></li><li data-type='method'><a href="SparseMatrixCSC.html#det">det</a></li><li data-type='method'><a href="SparseMatrixCSC.html#eigen">eigen</a></li><li data-type='method'><a href="SparseMatrixCSC.html#ger">ger</a></li><li data-type='method'><a href="SparseMatrixCSC.html#get">get</a></li><li data-type='method'><a href="SparseMatrixCSC.html#getDiagonal">getDiagonal</a></li><li data-type='method'><a href="SparseMatrixCSC.html#getJacobiPreconditioner">getJacobiPreconditioner</a></li><li data-type='method'><a href="SparseMatrixCSC.html#inv">inv</a></li><li data-type='method'><a href="SparseMatrixCSC.html#logDet">logDet</a></li><li data-type='method'><a href="SparseMatrixCSC.html#lu">lu</a></li><li data-type='method'><a href="SparseMatrixCSC.html#mul">mul</a></li><li data-type='method'><a href="SparseMatrixCSC.html#mulVec">mulVec</a></li><li data-type='method'><a href="SparseMatrixCSC.html#norm1">norm1</a></li><li data-type='method'><a href="SparseMatrixCSC.html#normF">normF</a></li><li data-type='method'><a href="SparseMatrixCSC.html#normInf">normInf</a></li><li data-type='method'><a href="SparseMatrixCSC.html#pinv">pinv</a></li><li data-type='method'><a href="SparseMatrixCSC.html#prune">prune</a></li><li data-type='method'><a href="SparseMatrixCSC.html#qr">qr</a></li><li data-type='method'><a href="SparseMatrixCSC.html#set">set</a></li><li data-type='method'><a href="SparseMatrixCSC.html#solve">solve</a></li><li data-type='method'><a href="SparseMatrixCSC.html#solveBiCGSTAB">solveBiCGSTAB</a></li><li data-type='method'><a href="SparseMatrixCSC.html#solveCG">solveCG</a></li><li data-type='method'><a href="SparseMatrixCSC.html#solveLowerTriangular">solveLowerTriangular</a></li><li data-type='method'><a href="SparseMatrixCSC.html#solveUpperTriangular">solveUpperTriangular</a></li><li data-type='method'><a href="SparseMatrixCSC.html#sub">sub</a></li><li data-type='method'><a href="SparseMatrixCSC.html#svd">svd</a></li><li data-type='method'><a href="SparseMatrixCSC.html#syrk">syrk</a></li><li data-type='method'><a href="SparseMatrixCSC.html#toDense">toDense</a></li><li data-type='method'><a href="SparseMatrixCSC.html#toString">toString</a></li><li data-type='method'><a href="SparseMatrixCSC.html#trace">trace</a></li><li data-type='method'><a href="SparseMatrixCSC.html#transpose">transpose</a></li><li data-type='method'><a href="SparseMatrixCSC.html#trsm">trsm</a></li><li data-type='method'><a href="SparseMatrixCSC.html#.fromCOO">fromCOO</a></li><li data-type='method'><a href="SparseMatrixCSC.html#.fromDense">fromDense</a></li></ul></li><li><a href="Vector.html">Vector</a><ul class='methods'><li data-type='method'><a href="Vector.html#add">add</a></li><li data-type='method'><a href="Vector.html#clone">clone</a></li><li data-type='method'><a href="Vector.html#dot">dot</a></li><li data-type='method'><a href="Vector.html#get">get</a></li><li data-type='method'><a href="Vector.html#norm">norm</a></li><li data-type='method'><a href="Vector.html#scale">scale</a></li><li data-type='method'><a href="Vector.html#set">set</a></li><li data-type='method'><a href="Vector.html#sub">sub</a></li><li data-type='method'><a href="Vector.html#toArray">toArray</a></li><li data-type='method'><a href="Vector.html#toString">toString</a></li></ul></li></ul><h3>Global</h3><ul><li><a href="global.html#Constants">Constants</a></li><li><a href="global.html#Flags">Flags</a></li><li><a href="global.html#O">O</a></li><li><a href="global.html#X">X</a></li><li><a href="global.html#abs">abs</a></li><li><a href="global.html#acos">acos</a></li><li><a href="global.html#altZeta">altZeta</a></li><li><a href="global.html#asin">asin</a></li><li><a href="global.html#atan">atan</a></li><li><a href="global.html#atan2">atan2</a></li><li><a href="global.html#bernoulli">bernoulli</a></li><li><a href="global.html#besseli">besseli</a></li><li><a href="global.html#besselj">besselj</a></li><li><a href="global.html#besselk">besselk</a></li><li><a href="global.html#bessely">bessely</a></li><li><a href="global.html#beta">beta</a></li><li><a href="global.html#bf">bf</a></li><li><a href="global.html#bigIntSqrt">bigIntSqrt</a></li><li><a href="global.html#ceil">ceil</a></li><li><a href="global.html#complex">complex</a></li><li><a href="global.html#cos">cos</a></li><li><a href="global.html#decimalPrecision">decimalPrecision</a></li><li><a href="global.html#diff">diff</a></li><li><a href="global.html#exp">exp</a></li><li><a href="global.html#factorial">factorial</a></li><li><a href="global.html#floor">floor</a></li><li><a href="global.html#fminbnd">fminbnd</a></li><li><a href="global.html#formatDecimal">formatDecimal</a></li><li><a href="global.html#fpround">fpround</a></li><li><a href="global.html#frac">frac</a></li><li><a href="global.html#fromDouble">fromDouble</a></li><li><a href="global.html#fzero">fzero</a></li><li><a href="global.html#gamma">gamma</a></li><li><a href="global.html#gcd">gcd</a></li><li><a href="global.html#getEpsilon">getEpsilon</a></li><li><a href="global.html#getGcEleLimit">getGcEleLimit</a></li><li><a href="global.html#getGlobalFlag">getGlobalFlag</a></li><li><a href="global.html#getPrecision">getPrecision</a></li><li><a href="global.html#hankel1">hankel1</a></li><li><a href="global.html#hankel2">hankel2</a></li><li><a href="global.html#hyp0f1">hyp0f1</a></li><li><a href="global.html#identify">identify</a></li><li><a href="global.html#init">init</a></li><li><a href="global.html#isInteger">isInteger</a></li><li><a href="global.html#isReady">isReady</a></li><li><a href="global.html#lambertw">lambertw</a></li><li><a href="global.html#libbf">libbf</a></li><li><a href="global.html#limit">limit</a></li><li><a href="global.html#linspace">linspace</a></li><li><a href="global.html#log">log</a></li><li><a href="global.html#logGamma">logGamma</a></li><li><a href="global.html#max">max</a></li><li><a href="global.html#min">min</a></li><li><a href="global.html#neg">neg</a></li><li><a href="global.html#nsum">nsum</a></li><li><a href="global.html#ode15s">ode15s</a></li><li><a href="global.html#ode45">ode45</a></li><li><a href="global.html#pdepe">pdepe</a></li><li><a href="global.html#poly">poly</a></li><li><a href="global.html#polyStr">polyStr</a></li><li><a href="global.html#polyfit">polyfit</a></li><li><a href="global.html#polyval">polyval</a></li><li><a href="global.html#popPrecision">popPrecision</a></li><li><a href="global.html#pow">pow</a></li><li><a href="global.html#primeZeta">primeZeta</a></li><li><a href="global.html#pushDecimalPrecision">pushDecimalPrecision</a></li><li><a href="global.html#pushPrecision">pushPrecision</a></li><li><a href="global.html#quad">quad</a></li><li><a href="global.html#romberg">romberg</a></li><li><a href="global.html#roots">roots</a></li><li><a href="global.html#round">round</a></li><li><a href="global.html#scalar">scalar</a></li><li><a href="global.html#setGcEleLimit">setGcEleLimit</a></li><li><a href="global.html#setGlobalFlag">setGlobalFlag</a></li><li><a href="global.html#setPrecision">setPrecision</a></li><li><a href="global.html#setThrowExceptionOnInvalidOp">setThrowExceptionOnInvalidOp</a></li><li><a href="global.html#shanks">shanks</a></li><li><a href="global.html#sign">sign</a></li><li><a href="global.html#sin">sin</a></li><li><a href="global.html#solveLinearSystem">solveLinearSystem</a></li><li><a href="global.html#sqrt">sqrt</a></li><li><a href="global.html#tan">tan</a></li><li><a href="global.html#throwExceptionOnInvalidOp">throwExceptionOnInvalidOp</a></li><li><a href="global.html#trunc">trunc</a></li><li><a href="global.html#zeta">zeta</a></li></ul>
+    
+</nav>
+
+<div id="main">
+    
+    <h1 class="page-title">quad.js</h1>
+    
+
+    
+
+
+
+    
+    <section>
+        <article>
+            <pre class="prettyprint source linenums"><code>import * as bfjs from "./bf.js";
+import { Complex, zero, half, one, two } from "./bf.js";
+
+/**
+ * High-precision Numerical Integration using Tanh-Sinh (Double Exponential) Quadrature.
+ * 
+ * SOTA level implementation equivalent to mpmath.quad.
+ * - Natively supports finite, half-infinite, and fully infinite bounds.
+ * - Supports Complex variables, endpoints, and complex integrands.
+ * - Supports contour/path integration when `_a` is an array of nodes and `_b` is undefined.
+ * - Extremely robust against endpoint singularities (e.g. log(0), 1/0) through smart boundary bypassing.
+ *
+ * @param {Function} f - The integrand function.
+ *        Must accept a BigFloat/Complex argument (z) and return a BigFloat/Complex result (f(z)).
+ *
+ * @param {number|string|BigFloat|Complex|Array} _a - The lower limit of integration, or an array of points for contour integration.
+ * @param {number|string|BigFloat|Complex} [_b] - The upper limit of integration (leave undefined for contour path integration).
+ *
+ * @param {Object} [info={}] - Configuration and Status object.
+ * @param {number}[info._e=1e-50] - Absolute Error Tolerance.
+ * @param {number}[info._re=info._e] - Relative Error Tolerance.
+ * @param {number}[info.max_step=15] - Maximum number of interval halving steps.
+ * @param {number}[info.max_time=60000] - Maximum execution time in milliseconds.
+ * @param {Function}[info.cb] - Optional callback function executed after each level computation.
+ * @param {boolean} [info.debug] - Optional flag to enable debug logging.
+ *
+ * @returns {BigFloat|Complex|null} Returns the exact integral value, or `null` if failed.
+ */
+export function quad(f, _a, _b, info = {}) {
+    // --- Utility: Safe Addition for Mixed BigFloat and Complex Types ---
+    function safeAdd(val1, val2) {
+        if (val1 === null) return val2;
+        if (val2 === null) return val1;
+        if (typeof val1.im === 'undefined' &amp;&amp; typeof val2.im !== 'undefined') {
+            return val2.add(val1); // Complex natively handles adding a BigFloat parameter
+        }
+        return val1.add(val2);
+    }
+
+    // --- Utility: Universal Info Status Updater ---
+    function updateInfoBase(info_obj) {
+        if (!info_obj.rerror) {
+            info_obj.eff_decimal_precision = 0;
+            info_obj.eff_result = '';
+            return;
+        }
+        if ((info_obj.rerror.isAlmostZero &amp;&amp; info_obj.rerror.isAlmostZero()) || info_obj.rerror === 0) {
+            info_obj.eff_decimal_precision = bfjs.decimalPrecision();
+        } else {
+            let logRerr = info_obj.rerror.log();
+            let logVal = logRerr.f64();
+            info_obj.eff_decimal_precision = Math.floor(-logVal / Math.log(10));
+        }
+        if (info_obj.eff_decimal_precision &lt;= 0) {
+            info_obj.eff_decimal_precision = 0;
+            info_obj.eff_result = '';
+        } else {
+            let lr = info_obj.lastresult;
+            if (info_obj.eff_decimal_precision > bfjs.decimalPrecision()) {
+                info_obj.eff_result = lr.toString(10);
+            } else {
+                info_obj.eff_result = lr.toString(10, info_obj.eff_decimal_precision);
+            }
+        }
+    }
+
+    let max_step = info.max_step || 15,
+        max_time = info.max_time || 60000;
+    let _e  = info._e ?? 1e-50;
+    let _re = info._re ?? _e;
+    
+    if (typeof(_e) != 'number' || typeof(_re) != 'number' || typeof(info) != "object") {
+        throw new Error("arguments error");
+    }
+    
+    let start_time = new Date().getTime();
+    info.toString = function() {
+        return `lastresult=${this.lastresult ? this.lastresult.toString() : 'N/A'}, 
+        effective_result=${this.eff_result},
+        steps=${this.steps}/${max_step}, 
+        error=${this.error ? this.error.toString(10,3) : 'N/A'},
+        rerror=${this.rerror ? this.rerror.toString(10,3) : 'N/A'},
+        eff_decimal_precision=${this.eff_decimal_precision}, 	  
+        exectime=${this.exectime}/${max_time}`
+    };
+
+    // ==========================================
+    // PATH (CONTOUR) INTEGRATION OVERLOAD
+    // ==========================================
+    if (Array.isArray(_a) &amp;&amp; _b === undefined) {
+        let points = _a;
+        if (points.length &lt; 2) return bfjs.bf(0);
+        
+        let total_integral = null;
+        let total_error = bfjs.bf(0);
+        let max_steps = 0;
+        
+        for (let i = 0; i &lt; points.length - 1; i++) {
+            let sub_info = Object.assign({}, info);
+            delete sub_info.cb; // Avoid redundant sequential callbacks during segments
+            delete sub_info.toString; 
+            
+            let res = quad(f, points[i], points[i+1], sub_info);
+            
+            if (res === null) {
+                info.result = null; // Fails if any segment fails to converge
+                return null;
+            }
+            total_integral = safeAdd(total_integral, res);
+            total_error = total_error.add(sub_info.error);
+            if (sub_info.steps > max_steps) max_steps = sub_info.steps;
+        }
+        
+        info.exectime = new Date().getTime() - start_time;
+        info.steps = max_steps;
+        info.error = total_error;
+        info.lastresult = total_integral;
+        info.result = total_integral;
+        
+        let abs_val = total_integral.abs(); // Complex or BigFloat native .abs()
+        info.rerror = abs_val.isAlmostZero() ? total_error : total_error.div(abs_val);
+        
+        updateInfoBase(info);
+        return total_integral;
+    }
+
+    // ==========================================
+    // SINGLE SEGMENT INTEGRATION
+    // ==========================================
+    function parseBound(val) {
+        if (val === '-Infinity' || val === 'Infinity') return val;
+        if (typeof val === 'string') {
+            if (val.includes('i') || val.includes('I')) return Complex.fromString(val);
+        }
+        if (typeof val === 'number' || typeof val === 'string') return bfjs.bf(val);
+        return val; // Already instantiated BigFloat or Complex
+    }
+
+    let a = parseBound(_a);
+    let b = parseBound(_b);
+    let a_str = a.toString();
+    let b_str = b.toString();
+    let a_is_inf = a_str === '-Infinity' || a_str === 'Infinity';
+    let b_is_inf = b_str === '-Infinity' || b_str === 'Infinity';
+
+    let e = bfjs.bf(_e), re = bfjs.bf(_re);
+
+    // Direction &amp; Swapping:
+    // Only applied to infinities to reuse infinite coordinate mappings.
+    // Finite bounds intentionally DO NOT SWAP, as c = (b - a)/2 intrinsically preserves contour direction!
+    let sign = 1;
+    if (a_is_inf || b_is_inf) {
+        let is_greater = false;
+        if (a_str === 'Infinity' &amp;&amp; b_str !== 'Infinity') is_greater = true;
+        if (a_str !== '-Infinity' &amp;&amp; b_str === '-Infinity') is_greater = true;
+        if (a_str === 'Infinity' &amp;&amp; b_str === '-Infinity') is_greater = true;
+        
+        if (is_greater) {
+            let tmp = a; a = b; b = tmp;
+            let tmp_inf = a_is_inf; a_is_inf = b_is_inf; b_is_inf = tmp_inf;
+            let tmp_str = a_str; a_str = b_str; b_str = tmp_str;
+            sign = -1;
+        }
+    } else {
+        // If either boundary is Complex, promote both to Complex to streamline m &amp; c calculations
+        if (a.im !== undefined || b.im !== undefined) {
+            if (a.im === undefined) a = new Complex(a);
+            if (b.im === undefined) b = new Complex(b);
+        }
+    }
+
+    const PI = bfjs.PI;
+    const f0p5 = half;
+    const bf_0 = zero;
+    const bf_1 = one;
+    const bf_2 = two;
+    const bf_m2 = bfjs.bf(-2);
+    const pi_over_2 = PI.mul(f0p5);
+
+    // --- Boundary Validation (Safeguard against endpoint singularities) ---
+    function isAtBoundary(x) {
+        if (!a_is_inf &amp;&amp; a !== undefined &amp;&amp; a !== null) {
+            if (x.equals(a)) return true;
+        }
+        if (!b_is_inf &amp;&amp; b !== undefined &amp;&amp; b !== null) {
+            if (x.equals(b)) return true;
+        }
+        return false;
+    }
+
+    // --- Dynamically selecting integration substitution map ---
+    let calc_x_w = null;
+
+    if (!a_is_inf &amp;&amp; !b_is_inf) {
+        // [a, b] Finite - elegantly supports directed contours via complex 'c'
+        let m = a.add(b).mul(f0p5);
+        let c = b.sub(a).mul(f0p5);
+        let c2 = b.sub(a); // equivalent to 2*c
+        
+        calc_x_w = (v, dv) => {
+            let ch = v.cosh();
+            let w = c.mul(dv).div(ch.mul(ch)); // c * dv / cosh^2(v)
+            
+            let x;
+            // High-precision stabilization to prevent catastrophic cancellation near real boundaries.
+            // Maintains precision near boundaries rather than wiping out digits in `m + c*th`.
+            if (typeof v.im === 'undefined' &amp;&amp; typeof a.im === 'undefined' &amp;&amp; typeof b.im === 'undefined') {
+                let sign_v = v.toNumber();
+                if (sign_v > 0) {
+                    let exp_2v = v.mul(bf_2).exp();
+                    let offset = c2.div(exp_2v.add(bf_1));
+                    x = b.sub(offset);
+                } else if (sign_v &lt; 0) {
+                    let exp_m2v = v.mul(bf_m2).exp();
+                    let offset = c2.div(exp_m2v.add(bf_1));
+                    x = a.add(offset);
+                } else {
+                    x = m;
+                }
+            } else {
+                let th = v.tanh();
+                x = m.add(c.mul(th)); // Fallback for Complex paths
+            }
+            return {x, w};
+        };
+    } else if (!a_is_inf &amp;&amp; b_str === 'Infinity') {
+        //[a, Infinity)
+        calc_x_w = (v, dv) => {
+            let ev = v.exp();
+            let x = a.add(ev);
+            let w = ev.mul(dv); // e^v * dv
+            return {x, w};
+        };
+    } else if (a_str === '-Infinity' &amp;&amp; !b_is_inf) {
+        // (-Infinity, b]
+        calc_x_w = (v, dv) => {
+            let ev = v.exp();
+            let x = b.sub(ev);
+            let w = ev.mul(dv); // Jacobian maps properly -> positive weight
+            return {x, w};
+        };
+    } else if (a_str === '-Infinity' &amp;&amp; b_str === 'Infinity') {
+        // (-Infinity, Infinity)
+        calc_x_w = (v, dv) => {
+            let x = v.sinh();
+            let w = v.cosh().mul(dv); // cosh(v) * dv
+            return {x, w};
+        };
+    } else {
+        // (+Infinity, +Infinity) or (-Infinity, -Infinity)
+        info.result = bf_0;
+        updateInfoBase(info);
+        return info.result;
+    }
+
+    /**
+     * Compute trapezoidal summation nodes for the current grid density
+     * @param {BigFloat} h - Step size
+     * @param {number} k_start - Step origin index
+     * @param {number} k_step - Stride (used for isolating odd-term summation)
+     */
+    function eval_sum(h, k_start, k_step) {
+        let sum = null;
+        let k = k_start;
+        let consecutive_zeros = 0;
+
+        // Origin node computation (Required for Level 0)
+        if (k === 0) {
+            let p0 = calc_x_w(bf_0, pi_over_2); 
+            if (!p0.w.isAlmostZero() &amp;&amp; !isAtBoundary(p0.x)) {
+                sum = f(p0.x).mul(p0.w);
+            } else {
+                sum = bf_0;
+            }
+            k += k_step;
+        }
+
+        while(true) {
+            let t = h.mul(k);
+            let v_plus = t.sinh().mul(pi_over_2);
+            let dv_plus = t.cosh().mul(pi_over_2);
+            
+            let p_plus = calc_x_w(v_plus, dv_plus);
+            let p_minus = calc_x_w(v_plus.neg(), dv_plus); // dv is an even function, stays positive
+
+            // Singularity protection &amp; structural bypass.
+            // When precision limits hit, 'x' might exactly equal bounds. Weights here are virtually zero.
+            let term_plus;
+            if (p_plus.w.isAlmostZero() || isAtBoundary(p_plus.x)) {
+                term_plus = bf_0;
+            } else {
+                term_plus = f(p_plus.x).mul(p_plus.w);
+            }
+
+            let term_minus;
+            if (p_minus.w.isAlmostZero() || isAtBoundary(p_minus.x)) {
+                term_minus = bf_0;
+            } else {
+                term_minus = f(p_minus.x).mul(p_minus.w);
+            }
+
+            let term_sum = safeAdd(term_plus, term_minus);
+            sum = safeAdd(sum, term_sum);
+
+            // Double-Exponential steep convergence guarantee: Break when node weights critically underflow
+            if ((term_plus.isAlmostZero() &amp;&amp; term_minus.isAlmostZero()) || (p_plus.w.isAlmostZero() &amp;&amp; p_minus.w.isAlmostZero())) {
+                consecutive_zeros++;
+                if (consecutive_zeros > 3) break;
+            } else {
+                consecutive_zeros = 0;
+            }
+
+            // Extreme Fail-Safe bounding
+            if (k > 100000) break;
+            k += k_step;
+        }
+        return sum === null ? bf_0 : sum;
+    }
+
+    // Level 0 Initialization
+    let h0 = one;
+    let T = eval_sum(h0, 0, 1).mul(h0);
+    
+    // Successive Adaptive Sub-interval Tracking
+    for(let m = 1; m &lt;= max_step; ++m) {
+        let h = one.div(bfjs.bf(2**m));
+        
+        // Summing solely across interlaced odd nodes -> T_{m} = 0.5 * T_{m-1} + h * sum_{odd}
+        let sum_new = eval_sum(h, 1, 2);
+        let Tm = safeAdd(T.mul(f0p5), sum_new.mul(h));
+
+        // Careful difference validation mapped strictly to the real axis for error bound metrics
+        let diff = (typeof Tm.im === 'undefined' &amp;&amp; typeof T.im !== 'undefined') ? T.sub(Tm) : Tm.sub(T);
+        let err = diff.abs(); 
+        let rerr = Tm.isAlmostZero() ? err : err.div(Tm.abs());
+
+        if (!!info.debug &amp;&amp; m > 2) {    	
+            console.log('Level['+m+']='+Tm.toString());
+            console.log('Error: '+err.toString(10,3));
+        }
+
+        info.exectime = new Date().getTime() - start_time;
+        info.lastresult = sign &lt; 0 ? Tm.neg() : Tm;
+        info.steps = m;
+        info.error = err;
+        info.rerror = rerr; 
+
+        // Block premature convergence on structurally deceptive integration waves (min bound m > 3)
+        if (m > 3 &amp;&amp; (err.cmp(e) &lt;= 0 || rerr.cmp(re) &lt;= 0)) {
+            info.result = info.lastresult;
+            updateInfoBase(info);
+            return info.result;
+        } else if (m == max_step || info.exectime > max_time) {
+            updateInfoBase(info);
+            info.result = null; // Execution limit hit without formal convergence
+            return info.result;
+        }
+
+        if (info.cb) {
+            updateInfoBase(info);
+            info.cb();
+        }
+        
+        T = Tm;
+    }
+}
+
+export { quad as integral };</code></pre>
+        </article>
+    </section>
+
+
+
+
+    
+    
+</div>
+
+<br class="clear">
+
+<footer>
+    Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 4.0.5</a> on Tue Mar 03 2026 16:14:48 GMT+0800 (中国标准时间) using the <a href="https://github.com/clenemt/docdash">docdash</a> theme.
+</footer>
+
+<script>prettyPrint();</script>
+<script src="scripts/polyfill.js"></script>
+<script src="scripts/linenumber.js"></script>
+
+
+
+</body>
+</html>

@@ -82,7 +82,7 @@ export function romberg(f,_a,_b,info={}){
     }
     var updateInfo=()=>{
         if(info.rerror.isZero()){
-            info.eff_decimal_precision=bfjs.decimal_precision();
+            info.eff_decimal_precision=bfjs.decimalPrecision();
         }else{
             info.eff_decimal_precision=Math.floor(-info.rerror.log().f64()/Math.log(10));
         }
@@ -90,7 +90,7 @@ export function romberg(f,_a,_b,info={}){
             info.eff_decimal_precision=0;
             info.eff_result='';
         }else{
-            if(info.eff_decimal_precision>bfjs.decimal_precision()){
+            if(info.eff_decimal_precision>bfjs.decimalPrecision()){
                 info.eff_result=info.lastresult.toString(10);
             }else{
                 info.eff_result=info.lastresult.toString(10,info.eff_decimal_precision);
@@ -151,5 +151,3 @@ export function romberg(f,_a,_b,info={}){
         T=Tm;
     }
 }
-
-export {romberg as integral};
