@@ -2957,7 +2957,7 @@ function pdepe(m, pdefun, icfun, bcfun, xmesh, tspan, info = {}) {
           for (let i = color; i < N; i += 3) {
             let j = i * D + d;
             let delta = y_val[j].abs().mul(jacobian_eps);
-            if (delta.isZero()) delta = jacobian_eps;
+            if (delta.cmp(jacobian_eps) < 0) delta = jacobian_eps;
             deltas[i] = delta;
             y_pert[j] = y_pert[j].add(delta);
             has_pert = true;
