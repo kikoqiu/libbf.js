@@ -192,7 +192,7 @@ export function ode15s(odefun, tspan, y0, info = {}) {
             let delta = y_val[j].abs().mul(jacobian_eps);
             
             // Prevent zero-derivative blackout via fallback delta
-            if (delta.isZero()) delta = jacobian_eps; 
+            if (delta.cmp(jacobian_eps) < 0) delta = jacobian_eps; 
             
             let inv_delta = one.div(delta); 
             y_pert[j] = y_pert[j].add(delta);
