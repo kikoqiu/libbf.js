@@ -1,6 +1,6 @@
 {
   "name": "bfjs",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "description": "libbf emscriptened.",
   "main": "dist/bf.cjs",
   "module": "dist/bf.mjs",
