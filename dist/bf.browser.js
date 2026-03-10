@@ -350,10 +350,10 @@ var bfjs = (() => {
      * @returns {Complex}
      */
     asin() {
-      const i = new _Complex(zero, one2);
-      const one2 = new _Complex(one2, zero);
+      const i = new _Complex(zero, one);
+      const c_one = new _Complex(one, zero);
       const iz = i.mul(this);
-      const sqrtPart = one2.sub(this.mul(this)).sqrt();
+      const sqrtPart = c_one.sub(this.mul(this)).sqrt();
       return iz.add(sqrtPart).log().mul(i.neg());
     }
     /**
@@ -361,9 +361,9 @@ var bfjs = (() => {
      * @returns {Complex}
      */
     acos() {
-      const i = new _Complex(zero, one2);
-      const one2 = new _Complex(one2, zero);
-      const sqrtPart = one2.sub(this.mul(this)).sqrt();
+      const i = new _Complex(zero, one);
+      const c_one = new _Complex(one, zero);
+      const sqrtPart = c_one.sub(this.mul(this)).sqrt();
       return this.add(i.mul(sqrtPart)).log().mul(i.neg());
     }
     /**
@@ -382,25 +382,25 @@ var bfjs = (() => {
      * @returns {Complex}
      */
     asinh() {
-      const one2 = new _Complex(one2, zero);
-      return this.add(this.mul(this).add(one2).sqrt()).log();
+      const c_one = new _Complex(one, zero);
+      return this.add(this.mul(this).add(c_one).sqrt()).log();
     }
     /**
      * Inverse Hyperbolic Cosine acosh(z) = ln(z + sqrt(z^2 - 1))
      * @returns {Complex}
      */
     acosh() {
-      const one2 = new _Complex(one2, zero);
-      return this.add(this.mul(this).sub(one2).sqrt()).log();
+      const c_one = new _Complex(one, zero);
+      return this.add(this.mul(this).sub(c_one).sqrt()).log();
     }
     /**
      * Inverse Hyperbolic Tangent atanh(z) = 0.5 * ln((1+z)/(1-z))
      * @returns {Complex}
      */
     atanh() {
-      const one2 = new _Complex(one2, zero);
+      const c_one = new _Complex(one, zero);
       const half2 = new _Complex(half2, zero);
-      return one2.add(this).div(one2.sub(this)).log().mul(half2);
+      return c_one.add(this).div(c_one.sub(this)).log().mul(half2);
     }
     // --- Utilities ---
     /**

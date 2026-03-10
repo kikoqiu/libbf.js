@@ -274,9 +274,9 @@ export class Complex {
      */
     asin() {
         const i = new Complex(zero, one);
-        const one = new Complex(one, zero);
+        const c_one = new Complex(one, zero);
         const iz = i.mul(this);
-        const sqrtPart = one.sub(this.mul(this)).sqrt();
+        const sqrtPart = c_one.sub(this.mul(this)).sqrt();
         return iz.add(sqrtPart).log().mul(i.neg());
     }
 
@@ -286,8 +286,8 @@ export class Complex {
      */
     acos() {
         const i = new Complex(zero, one);
-        const one = new Complex(one, zero);
-        const sqrtPart = one.sub(this.mul(this)).sqrt();
+        const c_one = new Complex(one, zero);
+        const sqrtPart = c_one.sub(this.mul(this)).sqrt();
         return this.add(i.mul(sqrtPart)).log().mul(i.neg());
     }
 
@@ -308,8 +308,8 @@ export class Complex {
      * @returns {Complex}
      */
     asinh() {
-        const one = new Complex(one, zero);
-        return this.add(this.mul(this).add(one).sqrt()).log();
+        const c_one = new Complex(one, zero);
+        return this.add(this.mul(this).add(c_one).sqrt()).log();
     }
 
     /**
@@ -317,8 +317,8 @@ export class Complex {
      * @returns {Complex}
      */
     acosh() {
-        const one = new Complex(one, zero);
-        return this.add(this.mul(this).sub(one).sqrt()).log();
+        const c_one = new Complex(one, zero);
+        return this.add(this.mul(this).sub(c_one).sqrt()).log();
     }
 
     /**
@@ -326,9 +326,9 @@ export class Complex {
      * @returns {Complex}
      */
     atanh() {
-        const one = new Complex(one, zero);
+        const c_one = new Complex(one, zero);
         const half = new Complex(half, zero);
-        return one.add(this).div(one.sub(this)).log().mul(half);
+        return c_one.add(this).div(c_one.sub(this)).log().mul(half);
     }
 
     // --- Utilities ---
