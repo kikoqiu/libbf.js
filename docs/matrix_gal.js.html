@@ -3,7 +3,7 @@
 <head>
     
     <meta charset="utf-8">
-    <title>Home - Documentation</title>
+    <title>matrix_gal.js - Documentation</title>
     
     
     <script src="scripts/prettify/prettify.js"></script>
@@ -35,362 +35,206 @@
 
 <div id="main">
     
+    <h1 class="page-title">matrix_gal.js</h1>
+    
 
     
 
 
 
     
+    <section>
+        <article>
+            <pre class="prettyprint source linenums"><code>import { SparseMatrixCSC } from "./bf";
 
+export const gallery = {
+    /**
+     * Generates an n-by-n Grcar matrix.
+     * A Grcar matrix is a Toeplitz matrix with -1 on the subdiagonal, 
+     * 1 on the main diagonal, and 1 on the first three superdiagonals.
+     * 
+     * @param {number} n - The dimension of the square matrix.
+     * @returns {SparseMatrixCSC}
+     */
+    grcar(n) {
+        const rowIdx = [], colIdx = [], vals =[];
+        for (let i = 0; i &lt; n; i++) {
+            if (i > 0) {
+                rowIdx.push(i); colIdx.push(i - 1); vals.push(-1);
+            }
+            rowIdx.push(i); colIdx.push(i); vals.push(1);
+            for (let k = 1; k &lt;= 3; k++) {
+                if (i + k &lt; n) {
+                    rowIdx.push(i); colIdx.push(i + k); vals.push(1);
+                }
+            }
+        }
+        return SparseMatrixCSC.fromCOO(n, n, rowIdx, colIdx, vals);
+    },
 
-    <section class="package">
-        <h3> </h3>		
+    /**
+     * Generates a 2D Poisson block tridiagonal matrix of size N = n^2.
+     * This arises from the 5-point finite difference approximation of the Poisson equation.
+     * 
+     * @param {number} n - The grid dimension (the resulting matrix is n^2 by n^2).
+     * @returns {SparseMatrixCSC}
+     */
+    poisson(n) {
+        const rowIdx = [], colIdx = [], vals =[];
+        const N = n * n;
+        for (let i = 0; i &lt; N; i++) {
+            rowIdx.push(i); colIdx.push(i); vals.push(4); // Main diagonal
+            if (i % n !== 0) { // Left neighbor
+                rowIdx.push(i); colIdx.push(i - 1); vals.push(-1);
+            }
+            if (i % n !== n - 1) { // Right neighbor
+                rowIdx.push(i); colIdx.push(i + 1); vals.push(-1);
+            }
+            if (i >= n) { // Top neighbor
+                rowIdx.push(i); colIdx.push(i - n); vals.push(-1);
+            }
+            if (i &lt; N - n) { // Bottom neighbor
+                rowIdx.push(i); colIdx.push(i + n); vals.push(-1);
+            }
+        }
+        return SparseMatrixCSC.fromCOO(N, N, rowIdx, colIdx, vals);
+    },
+
+    /**
+     * Generates an n-by-n Tridiagonal matrix.
+     * Default generates a typical 1D finite difference matrix: sub=-1, diag=2, sup=-1.
+     * 
+     * @param {number} n - Dimension of the matrix.
+     * @param {number}[c=-1] - Subdiagonal value.
+     * @param {number} [d=2] - Main diagonal value.
+     * @param {number} [e=-1] - Superdiagonal value.
+     * @returns {SparseMatrixCSC}
+     */
+    tridiag(n, c = -1, d = 2, e = -1) {
+        const rowIdx = [], colIdx = [], vals =[];
+        for (let i = 0; i &lt; n; i++) {
+            if (i > 0) {
+                rowIdx.push(i); colIdx.push(i - 1); vals.push(c);
+            }
+            rowIdx.push(i); colIdx.push(i); vals.push(d);
+            if (i &lt; n - 1) {
+                rowIdx.push(i); colIdx.push(i + 1); vals.push(e);
+            }
+        }
+        return SparseMatrixCSC.fromCOO(n, n, rowIdx, colIdx, vals);
+    },
+
+    /**
+     * Generates the n-by-n Clement matrix.
+     * A tridiagonal matrix with zero on the main diagonal and known eigenvalues.
+     * 
+     * @param {number} n - Dimension of the matrix.
+     * @returns {SparseMatrixCSC}
+     */
+    clement(n) {
+        const rowIdx = [], colIdx = [], vals =[];
+        for (let i = 0; i &lt; n - 1; i++) {
+            // Subdiagonal
+            rowIdx.push(i + 1); colIdx.push(i); vals.push(n - (i + 1));
+            // Superdiagonal
+            rowIdx.push(i); colIdx.push(i + 1); vals.push(i + 1);
+        }
+        // Even though diagonal is 0, we explicitly set the size to n-by-n via fromCOO parameters.
+        return SparseMatrixCSC.fromCOO(n, n, rowIdx, colIdx, vals);
+    },
+
+    /**
+     * Generates an n-by-n min(i, j) symmetric positive definite matrix.
+     * A_ij = min(i, j) where indices are 1-based.
+     * 
+     * @param {number} n - Dimension of the matrix.
+     * @returns {SparseMatrixCSC}
+     */
+    minij(n) {
+        const rowIdx = [], colIdx = [], vals =[];
+        for (let i = 0; i &lt; n; i++) {
+            for (let j = 0; j &lt; n; j++) {
+                rowIdx.push(i); colIdx.push(j); vals.push(Math.min(i + 1, j + 1));
+            }
+        }
+        return SparseMatrixCSC.fromCOO(n, n, rowIdx, colIdx, vals);
+    },
+
+    /**
+     * Generates an n-by-n Lehmer matrix.
+     * A symmetric positive definite matrix where A_ij = min(i,j) / max(i,j).
+     * 
+     * @param {number} n - Dimension of the matrix.
+     * @returns {SparseMatrixCSC}
+     */
+    lehmer(n) {
+        const rowIdx = [], colIdx = [], vals =[];
+        for (let i = 0; i &lt; n; i++) {
+            for (let j = 0; j &lt; n; j++) {
+                rowIdx.push(i); colIdx.push(j);
+                vals.push(Math.min(i + 1, j + 1) / Math.max(i + 1, j + 1));
+            }
+        }
+        return SparseMatrixCSC.fromCOO(n, n, rowIdx, colIdx, vals);
+    },
+
+    /**
+     * Generates the Pei matrix.
+     * A symmetric matrix where A_ij = 1, except A_ii = alpha + 1.
+     * 
+     * @param {number} n - Dimension of the matrix.
+     * @param {number}[alpha=1] - Scalar to add to the main diagonal.
+     * @returns {SparseMatrixCSC}
+     */
+    pei(n, alpha = 1) {
+        const rowIdx = [], colIdx = [], vals =[];
+        for (let i = 0; i &lt; n; i++) {
+            for (let j = 0; j &lt; n; j++) {
+                rowIdx.push(i); colIdx.push(j);
+                vals.push(i === j ? alpha + 1 : 1);
+            }
+        }
+        return SparseMatrixCSC.fromCOO(n, n, rowIdx, colIdx, vals);
+    },
+
+    /**
+     * Generates an n-by-n Hilbert matrix.
+     * A notoriously ill-conditioned matrix where A_ij = 1 / (i + j - 1). (1-based indices)
+     * 
+     * @param {number} n - Dimension of the matrix.
+     * @returns {SparseMatrixCSC}
+     */
+    hilb(n) {
+        const rowIdx = [], colIdx =[], vals =[];
+        for (let i = 0; i &lt; n; i++) {
+            for (let j = 0; j &lt; n; j++) {
+                rowIdx.push(i); colIdx.push(j); vals.push(1 / (i + j + 1));
+            }
+        }
+        return SparseMatrixCSC.fromCOO(n, n, rowIdx, colIdx, vals);
+    },
+
+    /**
+     * Generates a Circulant matrix from a given vector.
+     * 
+     * @param {number[]} v - The first row of the matrix.
+     * @returns {SparseMatrixCSC}
+     */
+    circul(v) {
+        const n = v.length;
+        const rowIdx = [], colIdx = [], vals =[];
+        for (let i = 0; i &lt; n; i++) {
+            for (let j = 0; j &lt; n; j++) {
+                rowIdx.push(i); colIdx.push(j);
+                // Circulant shift logic
+                vals.push(v[(j - i + n) % n]);
+            }
+        }
+        return SparseMatrixCSC.fromCOO(n, n, rowIdx, colIdx, vals);
+    }
+};</code></pre>
+        </article>
     </section>
-
-
-
-
-
-
-
-
-
-    
-
-
-
-    <section class="readme usertext">
-        <article><h1>libbf.js</h1>
-<p>A JavaScript library for arbitrary-precision floating-point, rational, and complex arithmetic, ported from Fabrice Bellard's original <a href="https://bellard.org/libbf/">LibBF</a> library using Emscripten. This library provides a robust and high-performance foundation for advanced mathematical computations in JavaScript and WebAssembly environments.</p>
-<h2>Core Features</h2>
-<ul>
-<li><strong>High-Precision Real Numbers (<code>BigFloat</code>)</strong>: Perform floating-point calculations with user-defined precision, far exceeding the limits of standard JavaScript numbers.</li>
-<li><strong>Exact Rational Arithmetic (<code>BigFraction</code>)</strong>: Represent and operate on numbers as fractions, avoiding precision loss for division.</li>
-<li><strong>Complex Number Arithmetic (<code>Complex</code>)</strong>: Full support for complex number operations, including transcendental functions.</li>
-<li><strong>Polynomial and Power Series (<code>Poly</code>)</strong>: Create and manipulate polynomials and truncated power series with generic coefficient types.</li>
-<li><strong>Automatic Type Promotion (<code>Scalar</code>)</strong>: A unified wrapper that automatically handles promotions between <code>BigFraction</code>, <code>BigFloat</code>, and <code>Complex</code> types during mixed-mode arithmetic.</li>
-<li><strong>High Performance</strong>: Core calculations are executed in WebAssembly, compiled from the highly optimized C code of LibBF.</li>
-</ul>
-<h2>Document</h2>
-<p><a href="https://kikoqiu.github.io/libbf.js/">https://kikoqiu.github.io/libbf.js/</a></p>
-<h2>Setup &amp; Initialization</h2>
-<p>The library relies on a WebAssembly (WASM) module for its core functionality. You must load and initialize this module before performing any calculations.</p>
-<pre class="prettyprint source lang-javascript"><code>// Import the library's init function
-import { init, bf, decimalPrecision } from 'bf.js';
-
-async function main() {
-    // 1. Load the Emscripten WASM module
-    let createLibbf=require('dist/libbf.js');
-    let libbf_module = await createLibbf({ locateFile: function(path, prefix) {
-        return &quot;dist/libbf.wasm&quot;;
-    }});
-    
-    // 2. Initialize the high-level bf.js library with the loaded module
-    await init(libbf_module);
-
-    console.log('libbf.js is ready to use!');
-
-    // 3. Start performing calculations
-    decimalPrecision(100); // Set precision to 100 decimal places
-
-    const a = bf('123.456');
-    const b = bf('789.123');
-    const c = a.mul(b);
-
-    console.log(c.toString());
-    // Output: 97421.969088000000000000000000000000000000000000000000000000000000000000000000000000000000000000000003
-}
-
-main();
-</code></pre>
-<h2>Usage Examples</h2>
-<h3>BigFloat</h3>
-<p>The <code>BigFloat</code> class is the workhorse for high-precision real number arithmetic. Use the <code>bf()</code> factory function for convenience.</p>
-<pre class="prettyprint source lang-javascript"><code>import { bf, Constants, precision, popPrecision, pushPrecision } from 'bf.js';
-
-// Set precision to 200 bits
-precision(200);
-
-// Basic arithmetic
-const a = bf(2).sqrt();
-console.log('sqrt(2) =', a.toString());
-
-// Use constants
-const pi = Constants.PI;
-console.log('PI =', pi.toString());
-
-// Temporarily change precision
-pushPrecision(50);
-console.log('Low-precision PI =', Constants.PI.toString()); // Constants are re-evaluated at current precision
-popPrecision();
-
-console.log('Original PI =', pi.toString());
-</code></pre>
-<h3>BigFraction</h3>
-<p>The <code>BigFraction</code> class provides exact rational arithmetic, avoiding floating-point errors.</p>
-<pre class="prettyprint source lang-javascript"><code>import { frac } from 'bf.js';
-
-const a = frac('1/3');
-const b = frac('1/6');
-
-// 1/3 + 1/6 = 3/6 = 1/2
-const c = a.add(b);
-console.log(c.toString()); // Output: &quot;1/2&quot;
-
-// Create from a float
-const d = frac(0.75);
-console.log(d.toString()); // Output: &quot;3/4&quot;
-</code></pre>
-<h3>Complex</h3>
-<p>The <code>Complex</code> class supports standard and transcendental operations on complex numbers.</p>
-<pre class="prettyprint source lang-javascript"><code>import { Constants, complex } from 'bf.js';
-
-// Create i
-const i = complex(0, 1);
-
-// Calculate e^(i*pi) = -1
-const euler = i.mul(Constants.PI).exp();
-console.log(euler.toString()); // Output: (-1)
-
-// (-1)^(0.5) = i
-const sqrt_neg_one = complex(-1).pow(0.5);
-console.log(sqrt_neg_one.toString()); // Output: (i)
-</code></pre>
-<h3>Poly (Polynomials)</h3>
-<p>The <code>Poly</code> class allows for the manipulation of polynomials and power series.</p>
-<pre class="prettyprint source lang-javascript"><code>import { poly, X } from 'bf.js';
-
-// Create a polynomial P(x) = 2X^2 - 3X + 1
-const p = poly([1, -3, 2]); // Dense array [c0, c1, c2, ...]
-
-// Evaluate at X=3
-console.log('P(3) =', p.eval(3).toString()); // 2*9 - 3*3 + 1 = 10
-
-// Create from a string
-const q = poly('X^3 - 1');
-
-// Differentiate
-const dq = q.deriv();
-console.log(&quot;d/dx (X^3 - 1) =&quot;, dq.toString()); // 3X^2
-
-// Integrate
-const iq = q.integ();
-console.log(&quot;integral(X^3 - 1) dx =&quot;, iq.toString()); // 0.25X^4 - 1X
-</code></pre>
-<h3>Scalar (Automatic Type Promotion)</h3>
-<p>The <code>Scalar</code> class wraps other numeric types and handles conversions automatically. This is especially useful for generic algorithms.</p>
-<pre class="prettyprint source lang-javascript"><code>import { scalar } from 'bf.js';
-
-const a = scalar('1/3');      // Starts as BigFraction
-const b = scalar(0.5);        // Starts as BigFloat
-const c = scalar(complex(1, 1)); // Starts as Complex
-
-// a + b promotes 'a' to BigFloat
-const r1 = a.add(b); // r1.value is a BigFloat
-console.log(r1.toString());
-
-// r1 + c promotes 'r1' to Complex
-const r2 = r1.add(c); // r2.value is a Complex
-console.log(r2.toString());
-</code></pre>
-<h2>Numerical Methods and Utilities</h2>
-<p><code>libbf.js</code> provides several high-precision numerical methods, similar to those found in scientific computing environments like MATLAB.</p>
-<h3><code>fminbnd(f, ax, bx, info)</code></h3>
-<p>Finds the local minimum of a function <code>f(x)</code> within a specified interval <code>[ax, bx]</code>. Uses Brent's method for robust and efficient minimization.</p>
-<pre class="prettyprint source lang-javascript"><code>import { bf } from 'bf.js';
-import { fminbnd } from 'bf.js';
-
-async function runFminbnd() {
-    // Assume bf.js is initialized and precision is set
-    // decimalPrecision(50); 
-
-    const f = (x) => x.mul(x).sub(bf(4).mul(x)).add(bf(5)); // f(x) = x^2 - 4x + 5 (minimum at x=2)
-    const ax = bf(0);
-    const bx = bf(3);
-
-    const info = {};
-    const result = fminbnd(f, ax, bx, info);
-
-    if (result) {
-        console.log('fminbnd result:', result.toString()); // Expected: 2.000...
-        console.log('f(result):', f(result).toString()); // Expected: 1.000...
-        console.log(info.toString());
-    } else {
-        console.log('fminbnd did not converge.');
-        console.log(info.toString());
-    }
-}
-// runFminbnd();
-</code></pre>
-<h3><code>fzero(f, a, b, info)</code></h3>
-<p>Finds a root (where <code>f(x) = 0</code>) of a function <code>f(x)</code> within an interval <code>[a, b]</code>. The function values at <code>a</code> and <code>b</code> must have opposite signs. Uses the Brent-Dekker method.</p>
-<pre class="prettyprint source lang-javascript"><code>import { bf } from 'bf.js';
-import { fzero } from 'bf.js';
-
-async function runFzero() {
-    // Assume bf.js is initialized and precision is set
-    // decimalPrecision(50); 
-
-    const f = (x) => x.mul(x).sub(bf(2)); // f(x) = x^2 - 2 (roots at +/- sqrt(2))
-    const a = bf(1);
-    const b = bf(2); // f(1) is negative, f(2) is positive
-
-    const info = {};
-    const result = fzero(f, a, b, info);
-
-    if (result) {
-        console.log('fzero result:', result.toString()); // Expected: 1.4142... (sqrt(2))
-        console.log('f(result):', f(result).toString()); // Expected: ~0
-        console.log(info.toString());
-    } else {
-        console.log('fzero did not converge.');
-        console.log(info.toString());
-    }
-}
-// runFzero();
-</code></pre>
-<h3><code>ode45(odefun, tspan, y0, info)</code></h3>
-<p>Solves ordinary differential equations (ODEs) of the form <code>y' = f(t, y)</code> using the Dormand-Prince explicit Runge-Kutta (4,5) method with adaptive step size.</p>
-<pre class="prettyprint source lang-javascript"><code>import { bf } from 'bf.js';
-import { ode45 } from 'bf.js';
-
-async function runOde45() {
-    // Assume bf.js is initialized
-
-    // y' = -2y, y(0) = 1. Solution: y(t) = e^(-2t)
-    const odefun = (t, y) => [y[0].mul(bf(-2))]; 
-    const tspan = [bf(0), bf(1)]; // Integrate from t=0 to t=1
-    const y0 = [bf(1)]; // Initial condition y(0)=1
-
-    const info = {};
-    const solution = ode45(odefun, tspan, y0, info);
-
-    if (solution) {
-        console.log('ODE45 solution at t=1:', solution.y[solution.y.length - 1][0].toString());
-        // Expected: e^(-2) = 0.13533528...
-        console.log(info.toString());
-    } else {
-        console.log('ODE45 solver failed.');
-        console.log(info.toString());
-    }
-}
-// runOde45();
-</code></pre>
-<h3><code>polyfit(x, y, order, info)</code></h3>
-<p>Performs polynomial curve fitting to data <code>(x, y)</code> using the least squares method. Returns the coefficients of the fitted polynomial.</p>
-<pre class="prettyprint source lang-javascript"><code>import { bf } from 'bf.js';
-import { polyfit, polyval } from 'bf.js'; // polyval is a helper to evaluate the fitted polynomial
-
-async function runPolyfit() {
-    // Assume bf.js is initialized
-
-    // Data points: y = 2x + 1
-    const x_data = [bf(0), bf(1), bf(2), bf(3)];
-    const y_data = [bf(1), bf(3), bf(5), bf(7)];
-
-    const order = 1; // Fit a linear polynomial (degree 1)
-    const info = {};
-    const coeffs = polyfit(x_data, y_data, order, info);
-
-    if (coeffs) {
-        // Coefficients are in descending order: [c_n, ..., c_0]
-        // For 2x+1, expected: [2, 1]
-        console.log('Polyfit coefficients:', coeffs.map(c => c.toString()));
-        console.log('Evaluated at x=2.5:', polyval(coeffs, bf(2.5)).toString()); // Expected: 6.0
-        console.log(info.toString());
-    } else {
-        console.log('Polyfit failed.');
-        console.log(info.toString());
-    }
-}
-// runPolyfit();
-</code></pre>
-<h3><code>quad(f, a, b, info)</code></h3>
-<p>Computes the definite integral of a function <code>f(x)</code> from <code>a</code> to <code>b</code> using Tanh-Sinh Quadrature.</p>
-<pre class="prettyprint source lang-javascript"><code>import { bf, Constants } from 'bf.js';
-import { quad } from 'bf.js';
-
-async function runQuad() {
-    // Assume bf.js is initialized
-
-    // Integrate f(x) = 4 / (1 + x^2) from 0 to 1. Expected: PI
-    const f = (x) => bf(4).div(bf(1).add(x.mul(x)));
-    const a = bf(0);
-    const b = bf(1);
-
-    const info = {};
-    const result = quad(f, a, b, info);
-
-    if (result) {
-        console.log('Quad integral:', result.toString());
-        console.log('Difference from PI:', result.sub(Constants.PI).abs().toString());
-        console.log(info.toString());
-    } else {
-        console.log('Quad integration failed.');
-        console.log(info.toString());
-    }
-}
-// runQuad();
-</code></pre>
-<h3><code>romberg(f, a, b, info)</code></h3>
-<p>Computes the definite integral of a function <code>f(x)</code> from <code>a</code> to <code>b</code> using Romberg's method, which applies Richardson extrapolation to the trapezoidal rule for high precision.</p>
-<pre class="prettyprint source lang-javascript"><code>import { bf, Constants } from 'bf.js';
-import { romberg } from 'bf.js';
-
-async function runRomberg() {
-    // Assume bf.js is initialized
-
-    // Integrate f(x) = 4 / (1 + x^2) from 0 to 1. Expected: PI
-    const f = (x) => bf(4).div(bf(1).add(x.mul(x)));
-    const a = bf(0);
-    const b = bf(1);
-
-    const info = {};
-    const result = romberg(f, a, b, info);
-
-    if (result) {
-        console.log('Romberg integral:', result.toString());
-        console.log('Difference from PI:', result.sub(Constants.PI).abs().toString());
-        console.log(info.toString());
-    } else {
-        console.log('Romberg integration failed.');
-        console.log(info.toString());
-    }
-}
-// runRomberg();
-</code></pre>
-<h3><code>roots(coeffs, info)</code></h3>
-<p>Calculates the roots of a polynomial given its coefficients. Uses the Durand-Kerner method for high-precision root finding.</p>
-<pre class="prettyprint source lang-javascript"><code>import { bf } from 'bf.js';
-import { roots } from 'bf.js';
-
-async function runRoots() {
-    // Assume bf.js is initialized
-
-    // Polynomial: x^2 - 5x + 6 = 0. Roots: x=2, x=3
-    const coeffs = [bf(1), bf(-5), bf(6)]; 
-
-    const info = {};
-    const result_roots = roots(coeffs, info);
-
-    if (result_roots) {
-        console.log('Polynomial roots:');
-        result_roots.forEach((r, i) => console.log(`  Root ${i + 1}: ${r.toString()}`));
-        console.log(info.toString());
-    } else {
-        console.log('Roots solver failed.');
-        console.log(info.toString());
-    }
-}
-// runRoots();
-</code></pre>
-<h2>Info</h2>
-<p>This library is a port of Fabrice Bellard's <strong>LibBF</strong>, a highly optimized C library for arbitrary-precision floating-point computation.</p>
-<h2>License</h2>
-<p>MIT License.</p></article>
-    </section>
-
-
 
 
 
