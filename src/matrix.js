@@ -1,4 +1,4 @@
-import { BigFloat, bf, zero, one, Vector } from "./bf";
+import { BigFloat, bf, zero, one, Vector, Complex } from "./bf";
 
 /**
  * Compressed Sparse Column (CSC) Matrix.
@@ -642,6 +642,24 @@ export class SparseMatrixCSC {
             new Uint32Array(resultRowIndices), 
             resultColPointers
         );
+    }
+
+    /**
+     * Scalar Multiplication (B = s * A).
+     * Executes in O(nnz) time.
+     * 
+     * @param {number|string|BigFloat} scalar - The scalar value to multiply with.
+     * @returns {SparseMatrixCSC} - The resulting sparse matrix.
+     */
+    
+    mulScalar(scalar) {
+        const s = scalar instanceof BigFloat ? scalar : bf(scalar);
+        if (s.isZero()) {
+            // Multiplying by zero results in a zero matrix
+            return new SparseMatrixCSC(this.rows, this.cols, [], new Uint32Array(), new Uint32Array(this.cols + 1));
+        }
+        const newValues = this.values.map(v => v.mul(s));
+        return new SparseMatrixCSC(this.rows, this.cols, newValues, this.rowIndices, this.colPointers);
     }
 
     /**
@@ -1639,8 +1657,54 @@ export class SparseMatrixCSC {
     }
 
     /**
+     * Computes ALL eigenvalues and eigenvectors using the globally convergent QR Algorithm.
+     * Uses $O(n^3)$ Hessenberg Reduction followed by $O(n^2)$ Implicit Double-Shift Francis QR.
+     * 
+     * @param {number|string|BigFloat}[tol="1e-15"] - Convergence tolerance.
+     * @param {number}[maxIter] - Maximum iterations (Defaults to dynamic bound based on size).
+     * @returns {Array<{eigenvalue: Complex, eigenvector: Array<Complex>}>} - List of complex eigenpairs sorted by magnitude descending.
+     */
+    eig(tol = "1e-15", maxIter = null) {
+        if (this.rows !== this.cols) throw new Error("Matrix must be square for Eigenvalue computation.");
+        const n = this.rows;
+        const eps = tol instanceof BigFloat ? tol : bf(tol);
+        const maxIterTotal = maxIter || (50 * Math.max(n, 10));
+
+        // Use dense fast arrays for the algorithm to avoid Sparse Object overhead
+        let H = this.toDense();
+        let V = new Array(n);
+        for (let i = 0; i < n; i++) {
+            V[i] = new Array(n).fill(zero);
+            V[i][i] = one;
+        }
+
+        // 1. Reduction to Upper Hessenberg Form
+        MatrixDense.hessenbergReduction(H, V);
+
+        // 2. Implicit Double-Shift Francis QR Iteration to Real Schur Form
+        MatrixDense.schurFrancisQR(H, V, eps, maxIterTotal);
+
+        // 3. Exact Extraction of Real/Complex Eigenvalues
+        const eigenvaluesInfo = MatrixDense.extractSchurEigenvalues(H, eps);
+
+        // 4. Construct Complex Eigenvectors via Geometrically Directed Gaussian Elimination
+        const result = MatrixDense.computeEigenvectors(H, V, eigenvaluesInfo);
+
+        // 5. Output strictly sorted by generic magnitude logic
+        result.sort((a, b) => {
+            let absA = a.eigenvalue.abs();
+            let absB = b.eigenvalue.abs();
+            if (absA.cmp(absB) > 0) return -1;
+            if (absA.cmp(absB) < 0) return 1;
+            return 0;
+        });
+
+        return result;
+    }
+
+    /**
      * Computes the Dominant Eigenpair using Power Iteration.
-     * In sparse libraries, eigenvalue solvers extract top-K values iteratively.
+     * Eigenvalue solvers extract top-K values iteratively.
      * 
      * @param {number|string|BigFloat} [tol="1e-20"] - Convergence tolerance.
      * @param {number} [maxIter=1000] - Maximum iterations.
@@ -1728,4 +1792,370 @@ export class SparseMatrixCSC {
         
         return { singularValue, u, v };
     }
+}
+
+
+export class MatrixDense {
+    // ============================================================================
+    // --- Independent Dense Matrix Algorithms (Static Utilities) ---
+    // ============================================================================
+
+    /**
+     * Reduces a dense square matrix H to Upper Hessenberg form in-place using Householder reflections.
+     * Accumulates the orthogonal transformations into matrix V.
+     * 
+     * @static
+     * @param {BigFloat[][]} H - Dense square matrix (Modified in-place).
+     * @param {BigFloat[][]} V - Transformation matrix (Modified in-place).
+     */
+    static hessenbergReduction(H, V) {
+        const n = H.length;
+        for (let k = 0; k < n - 2; k++) {
+            let scale = zero;
+            for (let i = k + 1; i < n; i++) scale = scale.add(H[i][k].abs());
+            
+            if (!scale.isZero()) {
+                // Optimization: Skip if already correctly zeroed out
+                let lowerZero = true;
+                for (let i = k + 2; i < n; i++) {
+                    if (!H[i][k].isZero()) { lowerZero = false; break; }
+                }
+                
+                if (!lowerZero) {
+                    let sumSq = zero;
+                    let u = new Array(n - k - 1);
+                    for (let i = 0; i < u.length; i++) {
+                        u[i] = H[k + 1 + i][k].div(scale);
+                        sumSq = sumSq.add(u[i].mul(u[i]));
+                    }
+                    
+                    let alpha = sumSq.sqrt();
+                    if (u[0].cmp(zero) > 0) alpha = alpha.neg();
+                    
+                    u[0] = u[0].sub(alpha);
+                    let normU2 = alpha.mul(alpha).sub(u[0].add(alpha).mul(alpha)); 
+                    
+                    // Apply to H from Left (Premultiply)
+                    for (let j = k; j < n; j++) {
+                        let dot = zero;
+                        for (let i = 0; i < u.length; i++) dot = dot.add(u[i].mul(H[k + 1 + i][j]));
+                        dot = dot.div(normU2);
+                        for (let i = 0; i < u.length; i++) H[k + 1 + i][j] = H[k + 1 + i][j].sub(dot.mul(u[i]));
+                    }
+                    
+                    // Apply to H from Right (Postmultiply)
+                    for (let i = 0; i < n; i++) {
+                        let dot = zero;
+                        for (let j = 0; j < u.length; j++) dot = dot.add(u[j].mul(H[i][k + 1 + j]));
+                        dot = dot.div(normU2);
+                        for (let j = 0; j < u.length; j++) H[i][k + 1 + j] = H[i][k + 1 + j].sub(dot.mul(u[j]));
+                    }
+                    
+                    // Accumulate Orthogonal Transformation in V
+                    for (let i = 0; i < n; i++) {
+                        let dot = zero;
+                        for (let j = 0; j < u.length; j++) dot = dot.add(u[j].mul(V[i][k + 1 + j]));
+                        dot = dot.div(normU2);
+                        for (let j = 0; j < u.length; j++) V[i][k + 1 + j] = V[i][k + 1 + j].sub(dot.mul(u[j]));
+                    }
+
+                    // Force strict structure to prevent floating debris
+                    H[k + 1][k] = alpha.mul(scale);
+                    for (let i = k + 2; i < n; i++) H[i][k] = zero;
+                }
+            }
+        }
+    }
+
+    /**
+     * Implements the Implicit Double-Shift Francis QR Algorithm.
+     * Reduces an Upper Hessenberg matrix H to Real Schur Form in-place.
+     * 
+     * @static
+     * @param {BigFloat[][]} H - Upper Hessenberg matrix (Modified in-place).
+     * @param {BigFloat[][]} V - Transformation matrix (Modified in-place).
+     * @param {BigFloat} eps - Convergence tolerance.
+     * @param {number} maxIterTotal - Maximum number of iterations before throwing an error.
+     */
+    static schurFrancisQR(H, V, eps, maxIterTotal) {
+        const n = H.length;
+        
+        // Calculate generic matrix norm to scale deflations proportionally
+        let normH = zero;
+        for (let i = 0; i < n; i++) {
+            for (let j = 0; j < n; j++) {
+                normH = normH.add(H[i][j].abs());
+            }
+        }
+        if (normH.isZero()) normH = one;
+
+        let p = n - 1;
+        let iterCount = 0;
+        const bf1_5 = bf(1.5);
+        while (p > 0) {
+            if (iterCount > maxIterTotal) throw new Error("QR Algorithm failed to converge within maximum iterations.");
+
+            // 1. Deflation check (Find independent active blocks)
+            let l = p;
+            while (l > 0) {
+                let subDiag = H[l][l - 1].abs();
+                let diagSum = H[l - 1][l - 1].abs().add(H[l][l].abs());
+                if (diagSum.isZero()) diagSum = normH;
+                
+                if (subDiag.cmp(diagSum.mul(eps)) <= 0) {
+                    H[l][l - 1] = zero;
+                    break;
+                }
+                l--;
+            }
+
+            if (l === p) {
+                p--;
+                iterCount = 0;
+                continue;
+            }
+            if (l === p - 1) {
+                p -= 2;
+                iterCount = 0;
+                continue;
+            }
+
+            // 2. Determine Wilkinson Double Shifts for Complex Root breaking
+            let s, t;
+            if (iterCount > 0 && iterCount % 10 === 0) {
+                let ad = H[p][p - 1].abs();
+                if (p > 1) ad = ad.add(H[p - 1][p - 2].abs());
+                s = ad.mul(bf1_5);
+                t = ad.mul(ad);
+            } else {
+                let p11 = H[p - 1][p - 1], p12 = H[p - 1][p], p21 = H[p][p - 1], p22 = H[p][p];
+                s = p11.add(p22);
+                t = p11.mul(p22).sub(p12.mul(p21));
+            }
+
+            // 3. Bulge introduction at the top of the block
+            let h_ll = H[l][l], h_l1_l = H[l + 1][l];
+            let h_l_l1 = H[l][l + 1], h_l1_l1 = H[l + 1][l + 1];
+            
+            let x = h_ll.mul(h_ll).add(h_l_l1.mul(h_l1_l)).sub(s.mul(h_ll)).add(t);
+            let y = h_l1_l.mul(h_ll.add(h_l1_l1).sub(s));
+            let z = h_l1_l.mul(H[l + 2][l + 1]);
+
+            // 4. Bulge chasing down the sub-diagonal
+            for (let k = l; k <= p - 1; k++) {
+                let nr = (k === p - 1) ? 2 : 3; 
+                
+                let max_val = x.abs();
+                if (y.abs().cmp(max_val) > 0) max_val = y.abs();
+                if (nr === 3 && z.abs().cmp(max_val) > 0) max_val = z.abs();
+                
+                if (!max_val.isZero()) {
+                    let x_n = x.div(max_val);
+                    let y_n = y.div(max_val);
+                    let z_n = nr === 3 ? z.div(max_val) : zero;
+                    
+                    let sumSq = x_n.mul(x_n).add(y_n.mul(y_n)).add(z_n.mul(z_n));
+                    let alpha = sumSq.sqrt();
+                    if (x_n.cmp(zero) > 0) alpha = alpha.neg();
+                    
+                    let u0 = x_n.sub(alpha);
+                    let u1 = y_n;
+                    let u2 = z_n;
+                    
+                    let normU2 = alpha.mul(alpha).sub(x_n.mul(alpha)); 
+                    
+                    // Left transform
+                    for (let j = Math.max(0, k - 1); j < n; j++) {
+                        let dot = u0.mul(H[k][j]).add(u1.mul(H[k + 1][j]));
+                        if (nr === 3) dot = dot.add(u2.mul(H[k + 2][j]));
+                        dot = dot.div(normU2);
+                        
+                        H[k][j] = H[k][j].sub(dot.mul(u0));
+                        H[k + 1][j] = H[k + 1][j].sub(dot.mul(u1));
+                        if (nr === 3) H[k + 2][j] = H[k + 2][j].sub(dot.mul(u2));
+                    }
+                    
+                    // Right transform
+                    let end_i = Math.min(k + 3, n - 1);
+                    for (let i = 0; i <= end_i; i++) {
+                        let dot = u0.mul(H[i][k]).add(u1.mul(H[i][k + 1]));
+                        if (nr === 3) dot = dot.add(u2.mul(H[i][k + 2]));
+                        dot = dot.div(normU2);
+                        
+                        H[i][k] = H[i][k].sub(dot.mul(u0));
+                        H[i][k + 1] = H[i][k + 1].sub(dot.mul(u1));
+                        if (nr === 3) H[i][k + 2] = H[i][k + 2].sub(dot.mul(u2));
+                    }
+                    
+                    // V transform mapping coordinates
+                    for (let i = 0; i < n; i++) {
+                        let dot = u0.mul(V[i][k]).add(u1.mul(V[i][k + 1]));
+                        if (nr === 3) dot = dot.add(u2.mul(V[i][k + 2]));
+                        dot = dot.div(normU2);
+                        
+                        V[i][k] = V[i][k].sub(dot.mul(u0));
+                        V[i][k + 1] = V[i][k + 1].sub(dot.mul(u1));
+                        if (nr === 3) V[i][k + 2] = V[i][k + 2].sub(dot.mul(u2));
+                    }
+                }
+                
+                // Read next targets for chasing
+                if (k < p - 1) {
+                    x = H[k + 1][k];
+                    y = H[k + 2][k];
+                    z = (k < p - 2) ? H[k + 3][k] : zero;
+                }
+            }
+            
+            // Re-enforce Hessenberg zeroes securely
+            for (let i = l; i <= p; i++) {
+                for (let j = 0; j <= i - 2; j++) {
+                    H[i][j] = zero;
+                }
+            }
+            
+            iterCount++;
+        }
+    }
+
+    /**
+     * Extracts complex and real eigenvalues from a Real Schur Form matrix.
+     * 
+     * @static
+     * @param {BigFloat[][]} H - Matrix in Real Schur Form.
+     * @param {BigFloat} eps - Convergence tolerance.
+     * @returns {Array<{lambda: Complex, index: number}>} - Extracted eigenvalues and submatrix boundary index.
+     */
+    static extractSchurEigenvalues(H, eps) {
+        const n = H.length;
+        const half = bf("0.5");
+        const eigenvaluesInfo =[];
+        let i = 0;
+        
+        while (i < n) {
+            if (i < n - 1) {
+                let subDiag = H[i + 1][i].abs();
+                if (subDiag.cmp(eps) > 0) {
+                    let a = H[i][i], b = H[i][i + 1], c = H[i + 1][i], d = H[i + 1][i + 1];
+                    let T_val = a.add(d);
+                    let D_val = a.mul(d).sub(b.mul(c));
+                    let halfT = T_val.mul(half);
+                    let disc = halfT.mul(halfT).sub(D_val);
+                    
+                    if (disc.cmp(zero) >= 0) {
+                        let sqrtDisc = disc.sqrt();
+                        eigenvaluesInfo.push({ lambda: new Complex(halfT.add(sqrtDisc), zero), index: i + 1 });
+                        eigenvaluesInfo.push({ lambda: new Complex(halfT.sub(sqrtDisc), zero), index: i + 1 });
+                    } else {
+                        let sqrtDisc = disc.neg().sqrt();
+                        eigenvaluesInfo.push({ lambda: new Complex(halfT, sqrtDisc), index: i + 1 });
+                        eigenvaluesInfo.push({ lambda: new Complex(halfT, sqrtDisc.neg()), index: i + 1 });
+                    }
+                    i += 2;
+                    continue;
+                }
+            }
+            eigenvaluesInfo.push({ lambda: new Complex(H[i][i], zero), index: i });
+            i += 1;
+        }
+        return eigenvaluesInfo;
+    }
+
+    /**
+     * Computes complex eigenvectors based on the Real Schur Form via Back-Substitution.
+     * Projects the vectors back into the original space using the orthogonal matrix V.
+     * 
+     * @static
+     * @param {BigFloat[][]} H - Matrix in Real Schur Form.
+     * @param {BigFloat[][]} V - Cumulative Orthogonal Transformation Matrix.
+     * @param {Array<{lambda: Complex, index: number}>} eigenvaluesInfo - List of extracted eigenvalues.
+     * @returns {Array<{eigenvalue: Complex, eigenvector: Array<Complex>}>} - Complete set of Eigenpairs.
+     */
+    static computeEigenvectors(H, V, eigenvaluesInfo) {
+        const n = H.length;
+        const result =[];
+        
+        for (const info of eigenvaluesInfo) {
+            const lambda = info.lambda;
+            const m = info.index;
+
+            // H_sub = H_local - lambda * I
+            const H_sub =[];
+            for (let r = 0; r <= m; r++) {
+                H_sub.push(new Array(m + 1));
+                for (let c = 0; c <= m; c++) {
+                    let val = new Complex(H[r][c], zero);
+                    if (r === c) val = val.sub(lambda);
+                    H_sub[r][c] = val;
+                }
+            }
+
+            // Gaussian Elimination strictly configured for Upper Hessenberg topologies
+            for (let k = 0; k < m; k++) {
+                let pivotMag = H_sub[k][k].abs();
+                let subMag = H_sub[k + 1][k].abs();
+
+                if (subMag.cmp(pivotMag) > 0) {
+                    let temp = H_sub[k];
+                    H_sub[k] = H_sub[k + 1];
+                    H_sub[k + 1] = temp;
+                }
+
+                if (H_sub[k][k].isZero()) continue;
+
+                let multiplier = H_sub[k + 1][k].div(H_sub[k][k]);
+                for (let j = k; j <= m; j++) {
+                    H_sub[k + 1][j] = H_sub[k + 1][j].sub(multiplier.mul(H_sub[k][j]));
+                }
+            }
+
+            // Back substitution mathematically isolates nullspace
+            const u = new Array(n).fill(null).map(() => new Complex(zero, zero));
+            u[m] = new Complex(one, zero);
+
+            for (let k = m - 1; k >= 0; k--) {
+                let sum = new Complex(zero, zero);
+                for (let j = k + 1; j <= m; j++) {
+                    sum = sum.add(H_sub[k][j].mul(u[j]));
+                }
+                
+                if (!H_sub[k][k].isZero()) {
+                    u[k] = sum.neg().div(H_sub[k][k]);
+                } else {
+                    u[k] = new Complex(one, zero); // Handles degenerate nullities safely
+                }
+            }
+
+            // Reproject logical root vector back via cumulative V projection
+            const eigvec = new Array(n).fill(null).map(() => new Complex(zero, zero));
+            for (let i_row = 0; i_row < n; i_row++) {
+                let sum = new Complex(zero, zero);
+                for (let j = 0; j <= m; j++) {
+                    if (!u[j].isZero()) {
+                        sum = sum.add(u[j].mul(V[i_row][j]));
+                    }
+                }
+                eigvec[i_row] = sum;
+            }
+
+            // High-Precision Vector Normalization
+            let normSq = zero;
+            for (let j = 0; j < n; j++) {
+                let mag = eigvec[j].abs();
+                normSq = normSq.add(mag.mul(mag));
+            }
+            let normVec = normSq.sqrt();
+            if (!normVec.isZero()) {
+                let cNorm = new Complex(normVec, zero);
+                for (let j = 0; j < n; j++) {
+                    eigvec[j] = eigvec[j].div(cNorm);
+                }
+            }
+
+            result.push({ eigenvalue: lambda, eigenvector: eigvec });
+        }
+        
+        return result;
+    }
+
 }

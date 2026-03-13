@@ -1861,6 +1861,7 @@ export function linspace(start, end, n) {
 export * from "./complex.js";
 export * from "./vector.js";
 export * from "./matrix.js";
+export * from "./matrix_gal.js";
 
 export * from "./polyfit.js";
 export * from "./ode45.js";
