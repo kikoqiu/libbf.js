@@ -1558,15 +1558,19 @@ export var two=null;
 /**
  * @type {BigFloat | null} 
  * @private
-*/
+ */
 export var three=null;
 /** 
  * @type {BigFloat | null} 
- * @private*/
+ * @private
+ * limited precision, use bf().setPI() for more precise value
+ */
 export var PI=null;
 /** 
  * @type {BigFloat | null} 
- * @private*/
+ * @private
+ * limited precision, use bf().setexp(1) for more precise value
+ */
 export var E=null;
 
 /**
@@ -1597,11 +1601,15 @@ export const Constants={
 	get three(){
 		return three;
 	},
-	/** @type {BigFloat | null} */
+	/** @type {BigFloat | null}
+	 * limited precision, use bf().setPI() for more precise value
+	 */
 	get PI(){
 		return PI;
 	},
-	/** @type {BigFloat | null} */
+	/** @type {BigFloat | null}
+	 * limited precision, use bf().setexp(1) for more precise value
+	 */
 	get E(){
 		return E;
 	}
